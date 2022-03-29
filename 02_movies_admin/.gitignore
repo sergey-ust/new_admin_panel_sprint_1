@@ -1,6 +1,12 @@
+# IDE project folders
 /.idea
 /.vcs
-*/__pycache__*
-/venv*
 
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment
+/venv*
 .env
