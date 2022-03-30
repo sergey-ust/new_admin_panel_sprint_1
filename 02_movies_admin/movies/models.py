@@ -50,6 +50,7 @@ class FilmWork(UUIDMixin, TimeStampedMixin):
         choices=FilmType.choices,
         default=FilmType.MOVIE,
     )
+    genres = models.ManyToManyField(Genre, through='GenreFilmWork')
 
     # If DB Constraints are needed, they could be added in Meta
     class Meta:
@@ -60,3 +61,11 @@ class FilmWork(UUIDMixin, TimeStampedMixin):
     def __str__(self):
         return self.title + ' ({0})'.format(self.creation_date.year)
 
+
+class GenreFilmWork(UUIDMixin):
+    film_work = models.ForeignKey('FilmWork', on_delete=models.CASCADE)
+    genre = models.ForeignKey('Genre', on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "content\".\"genre_film_work"
