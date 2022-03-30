@@ -27,6 +27,8 @@ class Genre(UUIDMixin, TimeStampedMixin):
         verbose_name = 'genre'
         verbose_name_plural = 'genres'
 
+    def __str__(self):
+        return self.name
 
 
 class FilmWork(UUIDMixin, TimeStampedMixin):
@@ -54,3 +56,7 @@ class FilmWork(UUIDMixin, TimeStampedMixin):
         db_table = 'content\".\"film_work'
         verbose_name = 'film'
         verbose_name_plural = 'films'
+
+    def __str__(self):
+        return self.title + ' ({0})'.format(self.creation_date.year)
+
