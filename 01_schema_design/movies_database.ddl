@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS content.film_work (
 
 CREATE TABLE IF NOT EXISTS content.person (
     id uuid PRIMARY KEY,
-    full_name TEXT NOT NULL,
+    full_name VARCHAR(200) NOT NULL,
     created timestamp with time zone,
     modified timestamp with time zone
 );
