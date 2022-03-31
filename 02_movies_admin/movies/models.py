@@ -1,11 +1,12 @@
 import uuid
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.utils.translation import gettext_lazy as _
 
 
 class TimeStampedMixin(models.Model):
-    created = models.DateTimeField('created', auto_now_add=True)
-    modified = models.DateTimeField('modified', auto_now=True)
+    created = models.DateTimeField(_('created'), auto_now_add=True)
+    modified = models.DateTimeField(_('modified'), auto_now=True)
 
     class Meta:
         abstract = True
@@ -19,25 +20,25 @@ class UUIDMixin(models.Model):
 
 
 class Genre(UUIDMixin, TimeStampedMixin):
-    name = models.CharField('name', max_length=100)
-    description = models.TextField('description', blank=True)
+    name = models.CharField(_(_('genre_name')), max_length=100)
+    description = models.TextField(_('description'), blank=True)
 
     class Meta:
         db_table = 'content\".\"genre'
-        verbose_name = 'genre'
-        verbose_name_plural = 'genres'
+        verbose_name = _('genre')
+        verbose_name_plural = _('genres')
 
     def __str__(self):
         return self.name
 
 
 class Person(UUIDMixin, TimeStampedMixin):
-    full_name = models.CharField('name', max_length=200)
+    full_name = models.CharField(_('name'), max_length=200)
 
     class Meta:
         db_table = 'content\".\"person'
-        verbose_name = 'person'
-        verbose_name_plural = 'persons'
+        verbose_name = _('person')
+        verbose_name_plural = _('persons')
 
     def __str__(self):
         return self.full_name
@@ -45,20 +46,20 @@ class Person(UUIDMixin, TimeStampedMixin):
 
 class FilmWork(UUIDMixin, TimeStampedMixin):
     class FilmType(models.TextChoices):
-        MOVIE = 'movie'
-        TV_SHOW = 'tv_show'
+        MOVIE = 'MOVIE', _('movie')
+        TV_SHOW = 'TV_SHOW', _('tv_show')
 
-    title = models.CharField('name', max_length=200)
-    description = models.TextField('description', blank=True)
-    creation_date = models.DateField('creation date')
+    title = models.CharField(_('film_name'), max_length=200)
+    description = models.TextField(_('description'), blank=True)
+    creation_date = models.DateField(_('creation date'))
     rating = models.FloatField(
-        'rating',
+        _('rating'),
         blank=True,
         validators=[MinValueValidator(0.0), MaxValueValidator(100.0)],
     )
     type = models.CharField(
-        "type",
-        max_length=10,
+        _('type'),
+        max_length=15,
         choices=FilmType.choices,
         default=FilmType.MOVIE,
     )
@@ -68,8 +69,8 @@ class FilmWork(UUIDMixin, TimeStampedMixin):
     # If DB Constraints are needed, they could be added in Meta
     class Meta:
         db_table = 'content\".\"film_work'
-        verbose_name = 'film'
-        verbose_name_plural = 'films'
+        verbose_name = _('film work')
+        verbose_name_plural = _('film works')
 
     def __str__(self):
         return self.title + ' ({0})'.format(self.creation_date.year)
@@ -78,17 +79,27 @@ class FilmWork(UUIDMixin, TimeStampedMixin):
 class GenreFilmWork(UUIDMixin):
     film_work = models.ForeignKey('FilmWork', on_delete=models.CASCADE)
     genre = models.ForeignKey('Genre', on_delete=models.CASCADE)
-    created = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(_('created'), auto_now_add=True)
 
     class Meta:
-        db_table = "content\".\"genre_film_work"
+        db_table = 'content\".\"genre_film_work'
+        verbose_name = _('film genre')
+        verbose_name_plural = _('film genres')
+
+    def __str__(self):
+        return ''
 
 
 class PersonFilmWork(UUIDMixin):
     film_work = models.ForeignKey('FilmWork', on_delete=models.CASCADE)
     person = models.ForeignKey('Person', on_delete=models.CASCADE)
-    role = models.TextField('role', blank=True)
+    role = models.TextField(_('role'), blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "content\".\"person_film_work"
+        db_table = 'content\".\"person_film_work'
+        verbose_name = _('film person')
+        verbose_name_plural = _('film persons')
+
+    def __str__(self):
+        return ''
