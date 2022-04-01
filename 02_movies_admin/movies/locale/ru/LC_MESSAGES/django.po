@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-31 21:20+0000\n"
+"POT-Creation-Date: 2022-04-01 20:18+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,94 +20,94 @@ msgstr ""
 "%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
 "%100>=11 && n%100<=14)? 2 : 3);\n"
 
-#: movies/apps.py:8
+#: movies/apps.py:12
 msgid "movies"
 msgstr "фильмы"
 
-#: movies/models.py:8 movies/models.py:82
+#: movies/models.py:17 movies/models.py:123
 msgid "created"
 msgstr "создано"
 
-#: movies/models.py:9
+#: movies/models.py:18
 msgid "modified"
 msgstr "изменено"
 
-#: movies/models.py:23
+#: movies/models.py:40
 msgid "genre_name"
 msgstr "название"
 
-#: movies/models.py:24 movies/models.py:53
+#: movies/models.py:41 movies/models.py:84
 msgid "description"
 msgstr "описание"
 
-#: movies/models.py:28
+#: movies/models.py:47 movies/models.py:122
 msgid "genre"
 msgstr "жанр"
 
-#: movies/models.py:29
+#: movies/models.py:48
 msgid "genres"
 msgstr "жанры"
 
-#: movies/models.py:36
+#: movies/models.py:61
 msgid "name"
 msgstr "имя"
 
-#: movies/models.py:40
+#: movies/models.py:67 movies/models.py:143
 msgid "person"
 msgstr "актер"
 
-#: movies/models.py:41
+#: movies/models.py:68
 msgid "persons"
 msgstr "актеры"
 
-#: movies/models.py:49
+#: movies/models.py:76
 msgid "movie"
 msgstr "фильм"
 
-#: movies/models.py:50
+#: movies/models.py:77
 msgid "tv_show"
 msgstr "тв программа"
 
-#: movies/models.py:52
+#: movies/models.py:83
 msgid "film_name"
 msgstr "название"
 
-#: movies/models.py:54
+#: movies/models.py:85
 msgid "creation date"
 msgstr "дата создания"
 
-#: movies/models.py:56
+#: movies/models.py:87
 msgid "rating"
 msgstr "рейтинг"
 
-#: movies/models.py:61
+#: movies/models.py:92
 msgid "type"
 msgstr "тип"
 
-#: movies/models.py:72
+#: movies/models.py:105 movies/models.py:120 movies/models.py:141
 msgid "film work"
 msgstr "кинопроизведение"
 
-#: movies/models.py:73
+#: movies/models.py:106
 msgid "film works"
 msgstr "кинопроизведения"
 
-#: movies/models.py:86
+#: movies/models.py:129
 msgid "film genre"
 msgstr "жанр кинопроизведения"
 
-#: movies/models.py:87
+#: movies/models.py:130
 msgid "film genres"
 msgstr "жанры кинопроизведения"
 
-#: movies/models.py:93
+#: movies/models.py:144
 msgid "role"
 msgstr "роль"
 
-#: movies/models.py:98
+#: movies/models.py:151
 msgid "film person"
 msgstr "актер кинопроизведения"
 
-#: movies/models.py:99
+#: movies/models.py:152
 msgid "film persons"
 msgstr "актеры кинопроизведения"
