@@ -47,7 +47,8 @@ class Genre(UUIDMixin, TimeStampedMixin):
         verbose_name = _('genre')
         verbose_name_plural = _('genres')
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Genre name."""
         return self.name
 
 
@@ -63,7 +64,8 @@ class Person(UUIDMixin, TimeStampedMixin):
         verbose_name = _('person')
         verbose_name_plural = _('persons')
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Person full name."""
         return self.full_name
 
 
@@ -100,7 +102,8 @@ class FilmWork(UUIDMixin, TimeStampedMixin):
         verbose_name = _('film work')
         verbose_name_plural = _('film works')
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Convert to name + creation date."""
         return self.title + ' ({0})'.format(self.creation_date.year)
 
 
@@ -118,7 +121,8 @@ class GenreFilmWork(UUIDMixin):
         verbose_name = _('film genre')
         verbose_name_plural = _('film genres')
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """No printable information."""
         return ''
 
 
@@ -137,5 +141,6 @@ class PersonFilmWork(UUIDMixin):
         verbose_name = _('film person')
         verbose_name_plural = _('film persons')
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """No printable information."""
         return ''
