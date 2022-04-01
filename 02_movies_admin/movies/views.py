@@ -1,3 +1,1 @@
-from django.shortcuts import render
-
-# Create your views here.
+"""Views take a web request and returns a web response."""

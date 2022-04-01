@@ -12,8 +12,8 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 import os
 
-from pathlib import Path
 from dotenv import load_dotenv
+from pathlib import Path
 from split_settings.tools import include
 
 load_dotenv()

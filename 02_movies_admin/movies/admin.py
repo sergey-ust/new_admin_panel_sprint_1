@@ -1,28 +1,33 @@
+"""Admin panel models."""
+
 from django.contrib import admin
-from .models import Genre, GenreFilmWork, FilmWork, Person, PersonFilmWork
+
+from movies import models as mov_model
 
 
-@admin.register(Genre)
+@admin.register(mov_model.Genre)
 class GenreAdmin(admin.ModelAdmin):
-    pass
+    """Admin model for ORM model "Genre"."""
 
 
-@admin.register(Person)
+@admin.register(mov_model.Person)
 class PersonAdmin(admin.ModelAdmin):
-    pass
+    """Admin model for ORM model "Person"."""
 
 
-class GenreFilmWorkInline(admin.TabularInline):
-    model = GenreFilmWork
+class _GenreFilmWorkInline(admin.TabularInline):
+    model = mov_model.GenreFilmWork
 
 
-class PersonFilmWorkInline(admin.TabularInline):
-    model = PersonFilmWork
+class _PersonFilmWorkInline(admin.TabularInline):
+    model = mov_model.PersonFilmWork
 
 
-@admin.register(FilmWork)
+@admin.register(mov_model.FilmWork)
 class FilmWorkAdmin(admin.ModelAdmin):
-    inlines = (GenreFilmWorkInline, PersonFilmWorkInline,)
-    list_display = ('title', 'type', 'creation_date', 'rating',)
+    """Admin model for ORM model "FilmWork"."""
+
+    inlines = (_GenreFilmWorkInline, _PersonFilmWorkInline)
+    list_display = ('title', 'type', 'creation_date', 'rating')
     list_filter = ('type',)
     search_fields = ('title', 'description')
