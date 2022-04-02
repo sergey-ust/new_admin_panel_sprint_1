@@ -1,6 +1,3 @@
---CREATE USER app;
---CREATE DATABASE movies_database OWNER app;
-
 CREATE SCHEMA IF NOT EXISTS content;
 
 CREATE TABLE IF NOT EXISTS content.film_work (
@@ -45,7 +42,3 @@ CREATE TABLE IF NOT EXISTS content.genre_film_work (
     UNIQUE (genre_id, film_work_id)
 );
 
---IF you need, you can use Unique Composite index Instead mark Unique
-
---CREATE UNIQUE INDEX IF NOT EXISTS person_film_work 
-  --ON dbo.yourtablename(person_id, film_work_id);  
