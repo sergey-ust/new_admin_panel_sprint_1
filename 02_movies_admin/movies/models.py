@@ -37,8 +37,8 @@ class UUIDMixin(models.Model):
 class Genre(UUIDMixin, TimeStampedMixin):
     """ORM model for "genre" table."""
 
-    name = models.CharField(_(_('genre_name')), max_length=100)
-    description = models.TextField(_('description'), blank=True)
+    name = models.CharField(_(_('genre_name')), max_length=100, unique=True)
+    description = models.TextField(_('description'), null=True, blank=True)
 
     class Meta:
         """ORM meta data."""
@@ -78,10 +78,11 @@ class FilmWork(UUIDMixin, TimeStampedMixin):
     """ORM model for "film_work" table."""
 
     title = models.CharField(_('film_name'), max_length=_FILM_NAME_MAX_LEN)
-    description = models.TextField(_('description'), blank=True)
+    description = models.TextField(_('description'))
     creation_date = models.DateField(_('creation date'))
     rating = models.FloatField(
         _('rating'),
+        null=True,
         blank=True,
         validators=[MinValueValidator(0), MaxValueValidator(100.0)],
     )
@@ -122,6 +123,7 @@ class GenreFilmWork(UUIDMixin):
         """ORM meta data."""
 
         db_table = 'content\".\"genre_film_work'
+        unique_together = ('film_work', 'genre')
         verbose_name = _('film genre')
         verbose_name_plural = _('film genres')
 
@@ -139,7 +141,7 @@ class PersonFilmWork(UUIDMixin):
     person = models.ForeignKey(
         'Person', on_delete=models.CASCADE, verbose_name=_('person'),
     )
-    role = models.TextField(_('role'), blank=True)
+    role = models.TextField(_('role'), null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
