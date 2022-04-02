@@ -43,7 +43,7 @@ class Genre(UUIDMixin, TimeStampedMixin):
     class Meta:
         """ORM meta data."""
 
-        db_table = 'content\".\"genre'
+        db_table = 'content"."genre'
         verbose_name = _('genre')
         verbose_name_plural = _('genres')
 
@@ -99,7 +99,10 @@ class FilmWork(UUIDMixin, TimeStampedMixin):
     class Meta:
         """ORM meta data."""
 
-        db_table = 'content\".\"film_work'
+        db_table = 'content"."film_work'
+        indexes = [
+            models.Index(fields=['title', ]),
+        ]
         verbose_name = _('film work')
         verbose_name_plural = _('film works')
 
@@ -122,7 +125,7 @@ class GenreFilmWork(UUIDMixin):
     class Meta:
         """ORM meta data."""
 
-        db_table = 'content\".\"genre_film_work'
+        db_table = 'content"."genre_film_work'
         unique_together = ('film_work', 'genre')
         verbose_name = _('film genre')
         verbose_name_plural = _('film genres')
@@ -147,7 +150,7 @@ class PersonFilmWork(UUIDMixin):
     class Meta:
         """ORM meta data."""
 
-        db_table = 'content\".\"person_film_work'
+        db_table = 'content"."person_film_work'
         verbose_name = _('film person')
         verbose_name_plural = _('film persons')
 
