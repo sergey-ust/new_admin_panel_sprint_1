@@ -1,0 +1,111 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-04-01 20:18+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: movies/apps.py:12
+msgid "movies"
+msgstr ""
+
+#: movies/models.py:17 movies/models.py:123
+msgid "created"
+msgstr ""
+
+#: movies/models.py:18
+msgid "modified"
+msgstr ""
+
+#: movies/models.py:40
+msgid "genre_name"
+msgstr ""
+
+#: movies/models.py:41 movies/models.py:84
+msgid "description"
+msgstr ""
+
+#: movies/models.py:47 movies/models.py:122
+msgid "genre"
+msgstr ""
+
+#: movies/models.py:48
+msgid "genres"
+msgstr ""
+
+#: movies/models.py:61
+msgid "name"
+msgstr ""
+
+#: movies/models.py:67 movies/models.py:143
+msgid "person"
+msgstr ""
+
+#: movies/models.py:68
+msgid "persons"
+msgstr ""
+
+#: movies/models.py:76
+msgid "movie"
+msgstr ""
+
+#: movies/models.py:77
+msgid "tv_show"
+msgstr ""
+
+#: movies/models.py:83
+msgid "film_name"
+msgstr ""
+
+#: movies/models.py:85
+msgid "creation date"
+msgstr ""
+
+#: movies/models.py:87
+msgid "rating"
+msgstr ""
+
+#: movies/models.py:92
+msgid "type"
+msgstr ""
+
+#: movies/models.py:105 movies/models.py:120 movies/models.py:141
+msgid "film work"
+msgstr ""
+
+#: movies/models.py:106
+msgid "film works"
+msgstr ""
+
+#: movies/models.py:129
+msgid "film genre"
+msgstr ""
+
+#: movies/models.py:130
+msgid "film genres"
+msgstr ""
+
+#: movies/models.py:144
+msgid "role"
+msgstr ""
+
+#: movies/models.py:151
+msgid "film person"
+msgstr ""
+
+#: movies/models.py:152
+msgid "film persons"
+msgstr ""
