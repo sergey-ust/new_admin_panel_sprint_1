@@ -1,50 +1,13 @@
 from contextlib import contextmanager
-from dataclasses import dataclass
-import datetime
 import os
 import sqlite3
-import uuid
 
 from dotenv import load_dotenv
 import psycopg2
 from psycopg2.extensions import connection as _connection
 from psycopg2.extras import DictCursor
 
-
-@dataclass()
-class FilmWork:
-    """PostreSQL 'filmwork' Table."""
-
-    _TITLE_MAX_LEN = 200
-    _TYPE_MAX_LEN = 15
-
-    id: uuid.UUID
-    title: str
-    description: str
-    creation_date: datetime.date
-    rating: float
-    type: str
-    created_at: datetime.datetime
-    updated_at: datetime.datetime
-
-    # timestamp max value is 2038 year
-
-    def __init__(
-            self, id_: str, title: str, description: str,
-            creation_date: str, rating: float, type_: str,
-            created_at: datetime.datetime, updated_at: datetime.datetime
-    ):
-        self.id = uuid.UUID(id_)
-        self.title = title[: self._TITLE_MAX_LEN]
-        self.description = description if description else ''
-        self.creation_date = datetime.date.fromisoformat(
-            creation_date if creation_date else '2038-01-19')
-        self.rating = rating
-        self.type = type_[:self._TYPE_MAX_LEN]
-        self.created_at = \
-            created_at if created_at else datetime.datetime.utcnow()
-        self.created_at = \
-            updated_at if updated_at else datetime.datetime.utcnow()
+from tables import QUOTE_SYMBOL, FilmWork, Genre
 
 
 def load_from_sqlite(connection: sqlite3.Connection, pg_conn: _connection):
