@@ -29,27 +29,43 @@ def conn_context(db_path: str):
 
 if __name__ == '__main__':
     load_dotenv()
-    # dsl = {
-    #     'dbname': 'movies_database',
-    #     'user': 'app',
-    #     'password': '123qwe',
-    #     'host': '127.0.0.1',
-    #     'port': 5432
-    # }
+
+    dsl = {
+        'dbname': os.environ.get('DB_NAME', 'movies_database'),
+        'user': 'app',
+        'password': '123qwe',
+        'host': os.environ.get('DB_HOST', '127.0.0.1'),
+        'port': int(os.environ.get('DB_PORT', 5432)),
+    }
+    db_path = os.environ.get('SQL_LITE_DB_PATH', 'db.sqlite')
     # with sqlite3.connect('db.sqlite') as sqlite_conn,\
     #         psycopg2.connect(**dsl, cursor_factory=DictCursor) as pg_conn:
     #     load_from_sqlite(sqlite_conn, pg_conn)
 
-    db_path = os.environ.get('SQL_LITE_DB_PATH', 'db.sqlite')
-    with conn_context(db_path) as conn:
+    with conn_context(db_path) as conn, open("film_work.csv", "w") as csv_file:
         curs = conn.cursor()
         curs.execute('SELECT * FROM film_work;')
         data = curs.fetchall()
+        i = 0
         for d in data:
-            d["id_"] = d.pop("id")
-            d["type_"] = d.pop("type")
-            d.pop("filepath")
+            out_data = dict(d)
+            out_data["id_"] = out_data.pop("id")
+            out_data["type_"] = out_data.pop("type")
+            out_data.pop("file_path")
             try:
-                FilmWork(**d)
+                csv_file.write(str(FilmWork(**out_data)))
             except Exception as e:
                 print("Can't convert entry: {}".format(e))
+            i += 1
+            if i > 50:
+                break
+
+    with psycopg2.connect(**dsl, cursor_factory=DictCursor) as pg_conn, \
+            pg_conn.cursor() as pg_cursor:
+        pg_cursor.execute("TRUNCATE TABLE content.person_film_work;")
+        pg_cursor.execute("TRUNCATE TABLE content.genre_film_work;")
+        pg_cursor.execute("TRUNCATE TABLE content.film_work CASCADE;")
+        with open("film_work.csv", "r") as csv_file:
+            pg_cursor.copy_expert(
+                "COPY content.film_work FROM STDIN WITH CSV DELIMITER ',' QUOTE '\u00016';",
+                csv_file)
