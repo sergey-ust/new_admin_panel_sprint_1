@@ -4,7 +4,8 @@ import uuid
 
 MAX_UNIX_DATE = '2038-01-19'
 UNIX_DATE_EMPTY_MARK = MAX_UNIX_DATE
-QUOTE_SYMBOL = "\u0016"
+QUOTE_SYMBOL = "\x16"
+NULL_SYMBOL = 'NULL'
 
 
 @dataclass()
@@ -25,7 +26,7 @@ class FilmWork:
 
     def __init__(
             self, id_: str, title: str, description: str,
-            creation_date: str, rating: float, type_: str,
+            creation_date: str, rating: str, type_: str,
             created_at: str, updated_at: str
     ):
         self.id = uuid.UUID(id_)
@@ -33,8 +34,12 @@ class FilmWork:
         self.description = description if description else ''
         self.creation_date = date.fromisoformat(
             creation_date if creation_date else UNIX_DATE_EMPTY_MARK)
-        self.rating = rating
+        try:
+            self.rating = float(rating)
+        except:
+            self.rating = None
         self.type = type_[:self._TYPE_MAX_LEN]
+        #  FixMe timestamp in table will contain convertation to my time(+3h)
         if created_at:
             self.created_at = datetime.strptime(created_at + ':00',
                                                 '%Y-%m-%d %H:%M:%S.%f%z')
@@ -49,15 +54,14 @@ class FilmWork:
     # FixMe: Replace all QUOTE_SYMBOL symbols
     def __str__(self) -> str:
         return '{created},{modified},{id_},{title},\
-        {description},{creation_date},\
-        {rating},{type_}\n'.format(
+        {description},{creation_date},{rating},{type_}\n'.format(
             created=self.created_at.isoformat(),
             modified=self.updated_at.isoformat(),
             id_=self.id,
             title=QUOTE_SYMBOL + self.title + QUOTE_SYMBOL,
             description=QUOTE_SYMBOL + self.description + QUOTE_SYMBOL,
             creation_date=self.creation_date.isoformat(),
-            rating=self.rating if self.rating else 'null',
+            rating=self.rating if self.rating else NULL_SYMBOL,
             type_=QUOTE_SYMBOL + self.type + QUOTE_SYMBOL,
         )
 
@@ -158,7 +162,7 @@ class PersonFilmWork:
         self.id = uuid.UUID(id_)
         self.film_work_id = uuid.UUID(film_work_id)
         self.person_id = uuid.UUID(person_id)
-        self.role = role if role else 'null'
+        self.role = role if role else NULL_SYMBOL
 
         if created_at:
             self.created = datetime.strptime(created_at + ':00',
