@@ -32,7 +32,7 @@ class FilmWork:
         self.title = title[: self._TITLE_MAX_LEN]
         self.description = description if description else ''
         self.creation_date = date.fromisoformat(
-            creation_date if creation_date else self.UNIX_DATE_EMPTY_MARK)
+            creation_date if creation_date else UNIX_DATE_EMPTY_MARK)
         self.rating = rating
         self.type = type_[:self._TYPE_MAX_LEN]
         if created_at:
@@ -77,19 +77,19 @@ class Genre:
 
     def __init__(
             self, id_: str, name: str, description: str,
-            created: str, updated: str
+            created_at: str, updated_at: str
     ):
         self.id = uuid.UUID(id_)
         self.name = name[: self._NAME_MAX_LEN]
         self.description = description if description else ''
 
-        if created:
-            self.created_at = datetime.strptime(created + ':00',
+        if created_at:
+            self.created_at = datetime.strptime(created_at + ':00',
                                                 '%Y-%m-%d %H:%M:%S.%f%z')
         else:
             self.created_at = datetime.datetime.utcnow()
-        if updated:
-            self.updated_at = datetime.strptime(updated + ':00',
+        if updated_at:
+            self.updated_at = datetime.strptime(updated_at + ':00',
                                                 '%Y-%m-%d %H:%M:%S.%f%z')
         else:
             self.updated_at = datetime.datetime.utcnow()
@@ -117,17 +117,18 @@ class Person:
     created_at: datetime
     updated_at: datetime
 
-    def __init__(self, id_: str, name: str, created: str, updated: str):
+    def __init__(self, id_: str, full_name: str, created_at: str,
+                 updated_at: str):
         self.id = uuid.UUID(id_)
-        self.full_name = name[: self._NAME_MAX_LEN]
+        self.full_name = full_name[: self._NAME_MAX_LEN]
 
-        if created:
-            self.created_at = datetime.strptime(created + ':00',
+        if created_at:
+            self.created_at = datetime.strptime(created_at + ':00',
                                                 '%Y-%m-%d %H:%M:%S.%f%z')
         else:
             self.created_at = datetime.datetime.utcnow()
-        if updated:
-            self.updated_at = datetime.strptime(updated + ':00',
+        if updated_at:
+            self.updated_at = datetime.strptime(updated_at + ':00',
                                                 '%Y-%m-%d %H:%M:%S.%f%z')
         else:
             self.updated_at = datetime.datetime.utcnow()
@@ -148,27 +149,27 @@ class PersonFilmWork:
 
     id: uuid.UUID
     role: str
-    created_at: datetime
+    created: datetime
     film_work_id: uuid.UUID
     person_id: uuid.UUID
 
-    def __init__(self, id_: str, role: str, created: str, film_work_id: str,
+    def __init__(self, id_: str, role: str, created_at: str, film_work_id: str,
                  person_id: str):
         self.id = uuid.UUID(id_)
         self.film_work_id = uuid.UUID(film_work_id)
         self.person_id = uuid.UUID(person_id)
         self.role = role if role else 'null'
 
-        if created:
-            self.created_at = datetime.strptime(created + ':00',
-                                                '%Y-%m-%d %H:%M:%S.%f%z')
+        if created_at:
+            self.created = datetime.strptime(created_at + ':00',
+                                             '%Y-%m-%d %H:%M:%S.%f%z')
         else:
-            self.created_at = datetime.datetime.utcnow()
+            self.created = datetime.datetime.utcnow()
 
     # FixMe: Replace all QUOTE_SYMBOL symbols
     def __str__(self) -> str:
         return '{id_},{role},{created},{film_id},{person_id}\n'.format(
-            created=self.created_at.isoformat(),
+            created=self.created.isoformat(),
             id_=self.id,
             film_id=self.film_work_id,
             person_id=self.person_id,
@@ -181,26 +182,26 @@ class GenreFilmWork:
     """PostreSQL 'genre_filmwork' Table."""
 
     id: uuid.UUID
-    created_at: datetime
+    created: datetime
     film_work_id: uuid.UUID
     genre_id: uuid.UUID
 
-    def __init__(self, id_: str, created: str, film_work_id: str,
+    def __init__(self, id_: str, created_at: str, film_work_id: str,
                  genre_id: str):
         self.id = uuid.UUID(id_)
         self.film_work_id = uuid.UUID(film_work_id)
         self.genre_id = uuid.UUID(genre_id)
 
-        if created:
-            self.created_at = datetime.strptime(created + ':00',
-                                                '%Y-%m-%d %H:%M:%S.%f%z')
+        if created_at:
+            self.created = datetime.strptime(created_at + ':00',
+                                             '%Y-%m-%d %H:%M:%S.%f%z')
         else:
-            self.created_at = datetime.datetime.utcnow()
+            self.created = datetime.datetime.utcnow()
 
     # FixMe: Replace all QUOTE_SYMBOL symbols
     def __str__(self) -> str:
         return '{id_},{created},{film_id},{genre_id}\n'.format(
-            created=self.created_at.isoformat(),
+            created=self.created.isoformat(),
             id_=self.id,
             film_id=self.film_work_id,
             genre_id=self.genre_id,
