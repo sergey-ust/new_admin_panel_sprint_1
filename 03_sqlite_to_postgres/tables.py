@@ -4,8 +4,9 @@ import uuid
 
 MAX_UNIX_DATE = '2038-01-19'
 UNIX_DATE_EMPTY_MARK = MAX_UNIX_DATE
-QUOTE_SYMBOL = "\x16"
+QUOTE_SYMBOL = '\x16'
 NULL_SYMBOL = 'NULL'
+DELIMITER = ','
 
 
 @dataclass()
@@ -36,7 +37,7 @@ class FilmWork:
             creation_date if creation_date else UNIX_DATE_EMPTY_MARK)
         try:
             self.rating = float(rating)
-        except:
+        except Exception:
             self.rating = None
         self.type = type_[:self._TYPE_MAX_LEN]
         #  FixMe timestamp in table will contain convertation to my time(+3h)

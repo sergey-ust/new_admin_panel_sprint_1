@@ -5,43 +5,98 @@ import sqlite3
 
 from dotenv import load_dotenv
 import psycopg2
-from psycopg2.extensions import connection as _connection
 from psycopg2.extras import DictCursor
 
-from tables import FilmWork, Genre, Person, PersonFilmWork, \
-    GenreFilmWork
+import tables
 
 
 def load_from_sqlite(sqlite_curs: sqlite3.Cursor, pg_cursor):
-    f_works = extract_film_work(sqlite_curs)
+    f_works = extract(sqlite_curs, "film_work", create_film_work)
     try:
-        post_film_work(pg_cursor, f_works)
+        post(pg_cursor, f_works, "content.film_work")
     except Exception as exp:
         print(f"Can't insert Film work data: {exp}.")
 
-    genres = extract_genre(sqlite_curs)
+    genres = extract(sqlite_curs, "genre", create_genre)
     try:
-        post_genre(pg_cursor, genres)
+        post(pg_cursor, genres, "content.genre")
     except Exception as exp:
         print(f"Can't insert Genre data: {exp}.")
 
-    persons = extract_person(sqlite_curs)
+    persons = extract(sqlite_curs, "person", create_person)
     try:
-        post_person(pg_cursor, persons)
+        post(pg_cursor, persons, "content.person")
     except Exception as exp:
         print(f"Can't insert Person data: {exp}.")
 
-    gf_works = extract_genre_film_work(sqlite_curs)
+    gf_works = extract(sqlite_curs, "genre_film_work", create_genre_film_work)
     try:
-        post_genre_film_work(pg_cursor, gf_works)
+        post(pg_cursor, gf_works, "content.genre_film_work")
     except Exception as exp:
         print(f"Can't insert GenreFilmWork data: {exp}.")
 
-    pf_works = extract_person_film_work(sqlite_curs)
+    pf_works = extract(sqlite_curs, "person_film_work",
+                       create_person_film_work)
     try:
-        post_person_film_work(pg_cursor, pf_works)
+        post(pg_cursor, pf_works, "content.person_film_work")
     except Exception as exp:
         print(f"Can't insert PersonFilmWork data: {exp}.")
+
+
+def extract(cursor: sqlite3.Cursor,
+            sqlite_table: str,
+            convertor) -> io.StringIO:
+    cursor.execute('SELECT * FROM {table};'.format(table=sqlite_table))
+    out = io.StringIO()
+    for entry in cursor.fetchall():
+        try:
+            fw_line = convertor(dict(entry))
+        except Exception as e:
+            print(f'Can\'t convert entry({entry}): {e}')
+        else:
+            out.write(fw_line)
+    return out
+
+
+def post(pg_cursor, csv: io.StringIO, postgres_name: str):
+    pg_cursor.execute(
+        "TRUNCATE TABLE {table} CASCADE;".format(table=postgres_name))
+    csv.seek(0)
+    pg_cursor.copy_expert(
+        "COPY {table} FROM STDIN \
+        WITH CSV DELIMITER '{delim}' NULL '{null}' QUOTE '{quote}';".format(
+            table=postgres_name,
+            delim=tables.DELIMITER,
+            null=tables.NULL_SYMBOL,
+            quote=tables.QUOTE_SYMBOL),
+        csv)
+
+
+def create_film_work(data: dict) -> str:
+    data["id_"] = data.pop("id")
+    data["type_"] = data.pop("type")
+    data.pop("file_path")
+    return str(tables.FilmWork(**data))
+
+
+def create_genre(data: dict) -> str:
+    data["id_"] = data.pop("id")
+    return str(tables.Genre(**data))
+
+
+def create_person(data: dict) -> str:
+    data["id_"] = data.pop("id")
+    return str(tables.Person(**data))
+
+
+def create_person_film_work(data: dict) -> str:
+    data["id_"] = data.pop("id")
+    return str(tables.PersonFilmWork(**data))
+
+
+def create_genre_film_work(data: dict) -> str:
+    data["id_"] = data.pop("id")
+    return str(tables.GenreFilmWork(**data))
 
 
 @contextmanager
@@ -50,129 +105,6 @@ def sqlite_conn_context(db_path: str):
     conn.row_factory = sqlite3.Row
     yield conn
     conn.close()
-
-
-def extract_film_work(cursor: sqlite3.Cursor) -> io.StringIO:
-    cursor.execute('SELECT * FROM film_work;')
-    out = io.StringIO()
-
-    for entry in cursor.fetchall():
-        out_data = dict(entry)
-        out_data["id_"] = out_data.pop("id")
-        out_data["type_"] = out_data.pop("type")
-        out_data.pop("file_path")
-        try:
-            fw_line = str(FilmWork(**out_data))
-        except Exception as e:
-            print(f'Can\'t convert entry({entry}): {e}')
-        else:
-            out.write(fw_line)
-    return out
-
-
-def post_film_work(pg_cursor, csv: io.StringIO):
-    pg_cursor.execute("TRUNCATE TABLE content.film_work CASCADE;")
-    csv.seek(0)
-    pg_cursor.copy_expert(
-        "COPY content.film_work FROM STDIN \
-        WITH CSV DELIMITER ',' NULL 'NULL' QUOTE '\x16';",
-        csv)
-
-
-def extract_genre(cursor: sqlite3.Cursor) -> io.StringIO:
-    cursor.execute('SELECT * FROM genre;')
-    out = io.StringIO()
-    for d in cursor.fetchall():
-        entry = dict(d)
-        entry["id_"] = entry.pop("id")
-        try:
-            line = str(Genre(**entry))
-        except Exception as e:
-            print(f'Can\'t convert entry({entry}): {e}')
-        else:
-            out.write(line)
-    return out
-
-
-def post_genre(pg_cursor, csv: io.StringIO):
-    pg_cursor.execute("TRUNCATE TABLE content.genre CASCADE;")
-    csv.seek(0)
-    pg_cursor.copy_expert(
-        "COPY content.genre FROM STDIN \
-        WITH CSV DELIMITER ',' NULL 'NULL' QUOTE '\x16';",
-        csv)
-
-
-def extract_person(cursor: sqlite3.Cursor):
-    cursor.execute('SELECT * FROM person;')
-    out = io.StringIO()
-    for d in cursor.fetchall():
-        entry = dict(d)
-        entry["id_"] = entry.pop("id")
-        try:
-            line = str(Person(**entry))
-        except Exception as e:
-            print(f'Can\'t convert entry({entry}): {e}')
-        else:
-            out.write(line)
-    return out
-
-
-def post_person(pg_cursor, csv: io.StringIO):
-    pg_cursor.execute("TRUNCATE TABLE content.person CASCADE;")
-    csv.seek(0)
-    pg_cursor.copy_expert(
-        "COPY content.person FROM STDIN \
-        WITH CSV DELIMITER ',' NULL 'NULL' QUOTE '\x16';",
-        csv)
-
-
-def extract_person_film_work(cursor: sqlite3.Cursor):
-    cursor.execute('SELECT * FROM person_film_work;')
-    out = io.StringIO()
-    for d in cursor.fetchall():
-        entry = dict(d)
-        entry["id_"] = entry.pop("id")
-        try:
-            line = str(PersonFilmWork(**entry))
-        except Exception as e:
-            print(f'Can\'t convert entry({entry}): {e}')
-        else:
-            out.write(line)
-    return out
-
-
-def post_person_film_work(pg_cursor, csv: io.StringIO):
-    pg_cursor.execute("TRUNCATE TABLE content.person_film_work;")
-    csv.seek(0)
-    pg_cursor.copy_expert(
-        "COPY content.person_film_work FROM STDIN \
-        WITH CSV DELIMITER ',' NULL 'NULL' QUOTE '\x16';",
-        csv)
-
-
-def extract_genre_film_work(cursor: sqlite3.Cursor):
-    cursor.execute('SELECT * FROM genre_film_work;')
-    out = io.StringIO()
-    for d in cursor.fetchall():
-        entry = dict(d)
-        entry["id_"] = entry.pop("id")
-        try:
-            line = str(GenreFilmWork(**entry))
-        except Exception as e:
-            print(f'Can\'t convert entry({entry}): {e}')
-        else:
-            out.write(line)
-    return out
-
-
-def post_genre_film_work(pg_cursor, csv: io.StringIO):
-    pg_cursor.execute("TRUNCATE TABLE content.genre_film_work;")
-    csv.seek(0)
-    pg_cursor.copy_expert(
-        "COPY content.genre_film_work FROM STDIN \
-        WITH CSV DELIMITER ',' NULL 'NULL' QUOTE '\x16';",
-        csv)
 
 
 def main():
