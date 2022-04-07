@@ -2,6 +2,8 @@ import io
 from contextlib import contextmanager
 import os
 import sqlite3
+from dataclasses import dataclass
+from typing import Callable, Union
 
 from dotenv import load_dotenv
 import psycopg2
@@ -9,56 +11,94 @@ from psycopg2.extras import DictCursor
 
 import tables
 
+AnyTable = Union[
+    tables.FilmWork,
+    tables.Genre,
+    tables.Person,
+    tables.PersonFilmWork,
+    tables.GenreFilmWork
+]
+
+
+@dataclass(frozen=True)
+class Convertor:
+    sqlite_table: str
+    psql_table: str
+    convert: Callable[
+        [dict[str, str]], AnyTable]
+
 
 def load_from_sqlite(sqlite_curs: sqlite3.Cursor, pg_cursor):
-    f_works = extract(sqlite_curs, "film_work", create_film_work)
-    try:
-        post(pg_cursor, f_works, "content.film_work")
-    except Exception as exp:
-        print(f"Can't insert Film work data: {exp}.")
+    convertors = (
+        Convertor(
+            sqlite_table='film_work',
+            psql_table='content.film_work',
+            convert=create_film_work
+        ),
+        Convertor(
+            sqlite_table='genre',
+            psql_table='content.genre',
+            convert=create_genre
+        ),
+        Convertor(
+            sqlite_table='person',
+            psql_table='content.person',
+            convert=create_person
+        ),
+        Convertor(
+            sqlite_table='genre_film_work',
+            psql_table='content.genre_film_work',
+            convert=create_genre_film_work
+        ),
+        Convertor(
+            sqlite_table='person_film_work',
+            psql_table='content.person_film_work',
+            convert=create_person_film_work
+        ),
+    )
+    for conv in convertors:
+        buff = io.StringIO()
+        buff = extract(sqlite_curs, conv.sqlite_table, conv.convert, buff)
+        try:
+            post(pg_cursor, buff, conv.psql_table)
+        except Exception as exp:
+            print(f"Insertion into {conv.psql_table} error: {exp}.")
+            if not clear_psql(pg_cursor, ('content.film_work',
+                                          'content.person',
+                                          'content.genre',
+                                          )):
+                print("There were some problems by PostgreSQL tables " +
+                      "truncating, please check the result in your DB viewer")
+                break
 
-    genres = extract(sqlite_curs, "genre", create_genre)
-    try:
-        post(pg_cursor, genres, "content.genre")
-    except Exception as exp:
-        print(f"Can't insert Genre data: {exp}.")
 
-    persons = extract(sqlite_curs, "person", create_person)
-    try:
-        post(pg_cursor, persons, "content.person")
-    except Exception as exp:
-        print(f"Can't insert Person data: {exp}.")
-
-    gf_works = extract(sqlite_curs, "genre_film_work", create_genre_film_work)
-    try:
-        post(pg_cursor, gf_works, "content.genre_film_work")
-    except Exception as exp:
-        print(f"Can't insert GenreFilmWork data: {exp}.")
-
-    pf_works = extract(sqlite_curs, "person_film_work",
-                       create_person_film_work)
-    try:
-        post(pg_cursor, pf_works, "content.person_film_work")
-    except Exception as exp:
-        print(f"Can't insert PersonFilmWork data: {exp}.")
+def clear_psql(cursor, psql_tables: tuple[str]) -> bool:
+    is_ok = True
+    for tbl in psql_tables:
+        try:
+            cursor.execute(
+                "TRUNCATE TABLE {table} CASCADE;".format(table=tbl))
+        except Exception as ex:
+            print(f"Can't truncate PostgreSql Table: {tbl} error: {ex}.")
+            is_ok = False
+    return is_ok
 
 
 def extract(cursor: sqlite3.Cursor,
             sqlite_table: str,
-            convertor) -> io.StringIO:
+            convertor, out_stream: io.TextIOBase) -> io.TextIOBase:
     cursor.execute('SELECT * FROM {table};'.format(table=sqlite_table))
-    out = io.StringIO()
     for entry in cursor.fetchall():
         try:
             fw_line = convertor(dict(entry))
         except Exception as e:
             print(f'Can\'t convert entry({entry}): {e}')
         else:
-            out.write(fw_line)
-    return out
+            out_stream.write(fw_line)
+    return out_stream
 
 
-def post(pg_cursor, csv: io.StringIO, postgres_name: str):
+def post(pg_cursor, csv: io.TextIOBase, postgres_name: str):
     pg_cursor.execute(
         "TRUNCATE TABLE {table} CASCADE;".format(table=postgres_name))
     csv.seek(0)
