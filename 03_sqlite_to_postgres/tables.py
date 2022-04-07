@@ -1,12 +1,19 @@
 from dataclasses import dataclass
 from datetime import date, datetime
 import uuid
+from typing import Union
 
 MAX_UNIX_DATE = '2038-01-19'
 UNIX_DATE_EMPTY_MARK = MAX_UNIX_DATE
 QUOTE_SYMBOL = '\x16'
 NULL_SYMBOL = 'NULL'
 DELIMITER = ','
+
+Str_None = Union[str, None]
+
+
+def quotes(line: str) -> str:
+    return QUOTE_SYMBOL + line + QUOTE_SYMBOL
 
 
 @dataclass()
@@ -20,15 +27,15 @@ class FilmWork:
     title: str
     description: str
     creation_date: date
-    rating: float
+    rating: Union[float, None]
     type: str
     created_at: datetime
     updated_at: datetime
 
     def __init__(
-            self, id_: str, title: str, description: str,
-            creation_date: str, rating: str, type_: str,
-            created_at: str, updated_at: str
+            self, id_: str, title: str, description: Str_None,
+            creation_date: Str_None, rating: str, type_: str,
+            created_at: Str_None, updated_at: Str_None
     ):
         self.id = uuid.UUID(id_)
         self.title = title[: self._TITLE_MAX_LEN]
@@ -40,7 +47,6 @@ class FilmWork:
         except Exception:
             self.rating = None
         self.type = type_[:self._TYPE_MAX_LEN]
-        #  FixMe timestamp in table will contain convertation to my time(+3h)
         if created_at:
             self.created_at = datetime.strptime(created_at + ':00',
                                                 '%Y-%m-%d %H:%M:%S.%f%z')
@@ -59,11 +65,11 @@ class FilmWork:
             created=self.created_at.isoformat(),
             modified=self.updated_at.isoformat(),
             id_=self.id,
-            title=QUOTE_SYMBOL + self.title + QUOTE_SYMBOL,
-            description=QUOTE_SYMBOL + self.description + QUOTE_SYMBOL,
+            title=quotes(self.title),
+            description=quotes(self.description),
             creation_date=self.creation_date.isoformat(),
             rating=self.rating if self.rating else NULL_SYMBOL,
-            type_=QUOTE_SYMBOL + self.type + QUOTE_SYMBOL,
+            type_=quotes(self.type),
         )
 
 
@@ -76,17 +82,17 @@ class Genre:
 
     id: uuid.UUID
     name: str
-    description: str
+    description: Str_None
     created_at: datetime
     updated_at: datetime
 
     def __init__(
-            self, id_: str, name: str, description: str,
-            created_at: str, updated_at: str
+            self, id_: str, name: str, description: Str_None,
+            created_at: Str_None, updated_at: Str_None
     ):
         self.id = uuid.UUID(id_)
         self.name = name[: self._NAME_MAX_LEN]
-        self.description = description if description else ''
+        self.description = description
 
         if created_at:
             self.created_at = datetime.strptime(created_at + ':00',
@@ -105,8 +111,9 @@ class Genre:
             created=self.created_at.isoformat(),
             modified=self.updated_at.isoformat(),
             id_=self.id,
-            name=QUOTE_SYMBOL + self.name + QUOTE_SYMBOL,
-            description=QUOTE_SYMBOL + self.description + QUOTE_SYMBOL,
+            name=quotes(self.name),
+            description=quotes(self.description) if self.description
+            else NULL_SYMBOL,
         )
 
 
@@ -122,8 +129,8 @@ class Person:
     created_at: datetime
     updated_at: datetime
 
-    def __init__(self, id_: str, full_name: str, created_at: str,
-                 updated_at: str):
+    def __init__(self, id_: str, full_name: str, created_at: Str_None,
+                 updated_at: Str_None):
         self.id = uuid.UUID(id_)
         self.full_name = full_name[: self._NAME_MAX_LEN]
 
@@ -144,7 +151,7 @@ class Person:
             created=self.created_at.isoformat(),
             modified=self.updated_at.isoformat(),
             id_=self.id,
-            name=QUOTE_SYMBOL + self.full_name + QUOTE_SYMBOL,
+            name=quotes(self.full_name),
         )
 
 
@@ -153,17 +160,17 @@ class PersonFilmWork:
     """PostreSQL 'person_filmwork' Table."""
 
     id: uuid.UUID
-    role: str
+    role: Str_None
     created: datetime
     film_work_id: uuid.UUID
     person_id: uuid.UUID
 
-    def __init__(self, id_: str, role: str, created_at: str, film_work_id: str,
-                 person_id: str):
+    def __init__(self, id_: str, role: str, created_at: Str_None,
+                 film_work_id: str, person_id: str):
         self.id = uuid.UUID(id_)
         self.film_work_id = uuid.UUID(film_work_id)
         self.person_id = uuid.UUID(person_id)
-        self.role = role if role else NULL_SYMBOL
+        self.role = role
 
         if created_at:
             self.created = datetime.strptime(created_at + ':00',
@@ -178,7 +185,7 @@ class PersonFilmWork:
             id_=self.id,
             film_id=self.film_work_id,
             person_id=self.person_id,
-            role=QUOTE_SYMBOL + self.role + QUOTE_SYMBOL,
+            role=quotes(self.role),
         )
 
 
@@ -191,7 +198,7 @@ class GenreFilmWork:
     film_work_id: uuid.UUID
     genre_id: uuid.UUID
 
-    def __init__(self, id_: str, created_at: str, film_work_id: str,
+    def __init__(self, id_: str, created_at: Str_None, film_work_id: str,
                  genre_id: str):
         self.id = uuid.UUID(id_)
         self.film_work_id = uuid.UUID(film_work_id)
