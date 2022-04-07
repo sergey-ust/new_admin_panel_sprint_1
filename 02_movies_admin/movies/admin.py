@@ -13,6 +13,8 @@ class GenreAdmin(admin.ModelAdmin):
 @admin.register(mov_model.Person)
 class PersonAdmin(admin.ModelAdmin):
     """Admin model for ORM model "Person"."""
+    ordering = ['full_name']
+    search_fields = ['full_name']
 
 
 class _GenreFilmWorkInline(admin.TabularInline):
@@ -21,6 +23,7 @@ class _GenreFilmWorkInline(admin.TabularInline):
 
 class _PersonFilmWorkInline(admin.TabularInline):
     model = mov_model.PersonFilmWork
+    autocomplete_fields = ['person']
 
 
 @admin.register(mov_model.FilmWork)
