@@ -154,6 +154,7 @@ def main():
         'port': int(os.environ.get('DB_PORT', 5432)),
     }
     db_path = os.environ.get('SQL_LITE_DB_PATH', 'db.sqlite')
+    psycopg2.extras.register_uuid()
 
     with sqlite_conn_context(db_path) as sqlite, \
             psycopg2.connect(**dsl, cursor_factory=DictCursor) as pg_conn, \

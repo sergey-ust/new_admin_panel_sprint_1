@@ -21,6 +21,7 @@ def psql_connect():
         'host': os.environ.get('DB_HOST', '127.0.0.1'),
         'port': int(os.environ.get('DB_PORT', 5432)),
     }
+    psycopg2.extras.register_uuid()
     with psycopg2.connect(**dsl, cursor_factory=DictCursor) as pg_conn, \
             pg_conn.cursor() as pg_cursor:
         pg_cursor.execute('SET SESSION TIME ZONE "UTC";')
