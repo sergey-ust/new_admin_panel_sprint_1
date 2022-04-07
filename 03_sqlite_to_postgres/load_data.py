@@ -10,6 +10,7 @@ import psycopg2
 from psycopg2.extras import DictCursor
 
 import tables
+from tables import SqliteTables
 
 AnyTable = Union[
     tables.FilmWork,
@@ -24,8 +25,7 @@ AnyTable = Union[
 class Convertor:
     sqlite_table: str
     psql_table: str
-    convert: Callable[
-        [dict[str, str]], AnyTable]
+    convert: Callable[[dict], AnyTable]
 
 
 def load_from_sqlite(sqlite_curs: sqlite3.Cursor, pg_cursor):
@@ -33,27 +33,32 @@ def load_from_sqlite(sqlite_curs: sqlite3.Cursor, pg_cursor):
         Convertor(
             sqlite_table='film_work',
             psql_table='content.film_work',
-            convert=create_film_work
+            convert=lambda data: tables.FilmWork.create_from_sqlite(
+                SqliteTables.FilmWork(**data))
         ),
         Convertor(
             sqlite_table='genre',
             psql_table='content.genre',
-            convert=create_genre
+            convert=lambda data: tables.Genre.create_from_sqlite(
+                SqliteTables.Genre(**data))
         ),
         Convertor(
             sqlite_table='person',
             psql_table='content.person',
-            convert=create_person
+            convert=lambda data: tables.Person.create_from_sqlite(
+                SqliteTables.Person(**data))
         ),
         Convertor(
             sqlite_table='genre_film_work',
             psql_table='content.genre_film_work',
-            convert=create_genre_film_work
+            convert=lambda data: tables.GenreFilmWork.create_from_sqlite(
+                SqliteTables.GenreFilmWork(**data))
         ),
         Convertor(
             sqlite_table='person_film_work',
             psql_table='content.person_film_work',
-            convert=create_person_film_work
+            convert=lambda data: tables.PersonFilmWork.create_from_sqlite(
+                SqliteTables.PersonFilmWork(**data))
         ),
     )
     result = True
@@ -76,7 +81,7 @@ def extract(cursor: sqlite3.Cursor,
     cursor.execute('SELECT * FROM {table};'.format(table=sqlite_table))
     for entry in cursor.fetchall():
         try:
-            fw_line = convertor(dict(entry))
+            fw_line = str(convertor(dict(entry)))
         except Exception as e:
             print(f'Can\'t convert entry({entry}): {e}')
         else:
@@ -98,35 +103,13 @@ def post(pg_cursor, csv: io.TextIOBase, postgres_name: str):
         csv)
 
 
-def create_film_work(data: dict) -> str:
-    data["id_"] = data.pop("id")
-    data["type_"] = data.pop("type")
-    data.pop("file_path")
-    return str(tables.FilmWork.create_from_sqlite(**data))
-
-
-def create_genre(data: dict) -> str:
-    data["id_"] = data.pop("id")
-    return str(tables.Genre.create_from_sqlite(**data))
-
-
-def create_person(data: dict) -> str:
-    data["id_"] = data.pop("id")
-    return str(tables.Person.create_from_sqlite(**data))
-
-
-def create_person_film_work(data: dict) -> str:
-    data["id_"] = data.pop("id")
-    return str(tables.PersonFilmWork.create_from_sqlite(**data))
-
-
-def create_genre_film_work(data: dict) -> str:
-    data["id_"] = data.pop("id")
-    return str(tables.GenreFilmWork.create_from_sqlite(**data))
-
-
 @contextmanager
 def sqlite_conn_context(db_path: str):
+    """ Attention!
+        We couldn't use 'sqlite3.PARSE_COLNAMES | sqlite3.PARSE_DECLTYPES'
+        for connection, Our db contains wrong formatted datetime fields:
+        e.g: 'filmwork' 6th row field 'updated_at'
+    """
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     yield conn
@@ -151,8 +134,8 @@ def main():
         pg_cursor.execute('SET SESSION TIME ZONE "UTC";')
         if not load_from_sqlite(sqlite.cursor(), pg_cursor):
             pg_conn.rollback()
-            print("There were some problems by tables " +
-                  "truncating, please check the result in your DB viewer")
+            print("There were some problems by tables. " +
+                  "Please check the work result in your DB viewer")
 
 
 if __name__ == '__main__':

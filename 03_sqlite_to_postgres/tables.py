@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 import uuid
 from typing import Union
 
@@ -15,6 +15,12 @@ Str_None = Union[str, None]
 def quotes(line: str) -> str:
     return QUOTE_SYMBOL + line + QUOTE_SYMBOL
 
+
+def str_to_datetime(line: str) -> datetime:
+    if line:
+        return datetime.strptime(line + ':00',
+                                 '%Y-%m-%d %H:%M:%S.%f%z')
+    return datetime.datetime.utcnow()
 
 
 class SqliteTables:
@@ -84,38 +90,31 @@ class FilmWork:
     modified: datetime
 
     @staticmethod
-    def create_from_sqlite(
-            id_: str, title: str, description: Str_None,
-            creation_date: Str_None, rating: str, type_: str,
-            created_at: Str_None, updated_at: Str_None
-    ):
-        descr = description if description else ''
+    def create_from_sqlite(lite_table: SqliteTables.FilmWork):
+        descr = lite_table.description if lite_table.description else ''
         creation = date.fromisoformat(
-            creation_date if creation_date else UNIX_DATE_EMPTY_MARK)
+            lite_table.creation_date if lite_table.creation_date
+            else UNIX_DATE_EMPTY_MARK
+        )
         try:
-            _rating = float(rating)
+            _rating = float(lite_table.rating)
         except Exception:
             _rating = None
-        if created_at:
-            created = datetime.strptime(created_at + ':00',
-                                        '%Y-%m-%d %H:%M:%S.%f%z')
-        else:
-            created = datetime.datetime.utcnow()
-        if updated_at:
-            updated = datetime.strptime(updated_at + ':00',
-                                        '%Y-%m-%d %H:%M:%S.%f%z')
-        else:
-            updated = datetime.datetime.utcnow()
+
+        created_at = str_to_datetime(lite_table.created_at).replace(
+            tzinfo=timezone.utc)
+        updated_at = str_to_datetime(lite_table.updated_at).replace(
+            tzinfo=timezone.utc)
 
         return FilmWork(
-            id=uuid.UUID(id_),
-            title=title[: FilmWork._TITLE_MAX_LEN],
+            id=uuid.UUID(lite_table.id),
+            title=lite_table.title[: FilmWork._TITLE_MAX_LEN],
             description=descr,
             creation_date=creation,
-            rating=_rating,
-            type=type_[:FilmWork._TYPE_MAX_LEN],
-            created=created,
-            modified=updated
+            rating=lite_table.rating,
+            type=lite_table.type[:FilmWork._TYPE_MAX_LEN],
+            created=created_at,
+            modified=updated_at
         )
 
     # FixMe: Replace all QUOTE_SYMBOL symbols
@@ -147,24 +146,18 @@ class Genre:
     modified: datetime
 
     @staticmethod
-    def create_from_sqlite(
-            id_: str, name: str, description: Str_None,
-            created_at: Str_None, updated_at: Str_None):
+    def create_from_sqlite(lite_table: SqliteTables.Genre):
+        created_at = str_to_datetime(lite_table.created_at).replace(
+            tzinfo=timezone.utc)
+        updated_at = str_to_datetime(lite_table.updated_at).replace(
+            tzinfo=timezone.utc)
 
-        if created_at:
-            created_at = datetime.strptime(created_at + ':00',
-                                           '%Y-%m-%d %H:%M:%S.%f%z')
-        else:
-            created_at = datetime.datetime.utcnow()
-        if updated_at:
-            updated_at = datetime.strptime(
-                updated_at + ':00',
-                '%Y-%m-%d %H:%M:%S.%f%z')
-        else:
-            updated_at = datetime.datetime.utcnow()
         return Genre(
-            uuid.UUID(id_), name[: Genre._NAME_MAX_LEN],
-            description, created_at, updated_at
+            id=uuid.UUID(lite_table.id),
+            name=lite_table.name[: Genre._NAME_MAX_LEN],
+            description=lite_table.description,
+            created=created_at,
+            modified=updated_at
         )
 
     # FixMe: Replace all QUOTE_SYMBOL symbols
@@ -193,24 +186,17 @@ class Person:
     modified: datetime
 
     @staticmethod
-    def create_from_sqlite(id_: str, full_name: str, created_at: Str_None,
-                           updated_at: Str_None):
-        if created_at:
-            created = datetime.strptime(created_at + ':00',
-                                        '%Y-%m-%d %H:%M:%S.%f%z')
-        else:
-            created = datetime.datetime.utcnow()
-        if updated_at:
-            updated = datetime.strptime(updated_at + ':00',
-                                        '%Y-%m-%d %H:%M:%S.%f%z')
-        else:
-            updated = datetime.datetime.utcnow()
+    def create_from_sqlite(lite_table: SqliteTables.Person):
+        created_at = str_to_datetime(lite_table.created_at).replace(
+            tzinfo=timezone.utc)
+        updated_at = str_to_datetime(lite_table.updated_at).replace(
+            tzinfo=timezone.utc)
 
         return Person(
-            id=uuid.UUID(id_),
-            full_name=full_name[: Person._NAME_MAX_LEN],
-            created=created,
-            modified=updated
+            id=uuid.UUID(lite_table.id),
+            full_name=lite_table.full_name[: Person._NAME_MAX_LEN],
+            created=created_at,
+            modified=updated_at
         )
 
     # FixMe: Replace all QUOTE_SYMBOL symbols
@@ -234,20 +220,16 @@ class PersonFilmWork:
     person_id: uuid.UUID
 
     @staticmethod
-    def create_from_sqlite(id_: str, role: str, created_at: Str_None,
-                           film_work_id: str, person_id: str):
-        if created_at:
-            created = datetime.strptime(created_at + ':00',
-                                        '%Y-%m-%d %H:%M:%S.%f%z')
-        else:
-            created = datetime.datetime.utcnow()
+    def create_from_sqlite(lite_table: SqliteTables.PersonFilmWork):
+        created_at = str_to_datetime(lite_table.created_at).replace(
+            tzinfo=timezone.utc)
 
         return PersonFilmWork(
-            id=uuid.UUID(id_),
-            role=role,
-            created=created,
-            film_work_id=uuid.UUID(film_work_id),
-            person_id=uuid.UUID(person_id)
+            id=uuid.UUID(lite_table.id),
+            role=lite_table.role,
+            created=created_at,
+            film_work_id=uuid.UUID(lite_table.film_work_id),
+            person_id=uuid.UUID(lite_table.person_id)
         )
 
     # FixMe: Replace all QUOTE_SYMBOL symbols
@@ -271,19 +253,15 @@ class GenreFilmWork:
     genre_id: uuid.UUID
 
     @staticmethod
-    def create_from_sqlite(id_: str, created_at: Str_None, film_work_id: str,
-                           genre_id: str):
-        if created_at:
-            created = datetime.strptime(created_at + ':00',
-                                        '%Y-%m-%d %H:%M:%S.%f%z')
-        else:
-            created = datetime.datetime.utcnow()
+    def create_from_sqlite(lite_table: SqliteTables.GenreFilmWork):
+        created_at = str_to_datetime(lite_table.created_at).replace(
+            tzinfo=timezone.utc)
 
         return GenreFilmWork(
-            id=uuid.UUID(id_),
-            created=created,
-            film_work_id=uuid.UUID(film_work_id),
-            genre_id=uuid.UUID(genre_id)
+            id=uuid.UUID(lite_table.id),
+            created=created_at,
+            film_work_id=uuid.UUID(lite_table.film_work_id),
+            genre_id=uuid.UUID(lite_table.genre_id)
         )
 
     # FixMe: Replace all QUOTE_SYMBOL symbols
