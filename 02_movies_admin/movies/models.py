@@ -100,9 +100,6 @@ class FilmWork(UUIDMixin, TimeStampedMixin):
         """ORM meta data."""
 
         db_table = 'content"."film_work'
-        indexes = [
-            models.Index(fields=['title', ]),
-        ]
         verbose_name = _('film work')
         verbose_name_plural = _('film works')
 
