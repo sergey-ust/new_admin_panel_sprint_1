@@ -69,21 +69,10 @@ def load_from_sqlite(sqlite_curs: sqlite3.Cursor, pg_cursor):
     return result
 
 
-def clear_psql(cursor, psql_tables: tuple[str]) -> bool:
-    is_ok = True
-    for tbl in psql_tables:
-        try:
-            cursor.execute(
-                "TRUNCATE TABLE {table} CASCADE;".format(table=tbl))
-        except Exception as ex:
-            print(f"Can't truncate PostgreSql Table: {tbl} error: {ex}.")
-            is_ok = False
-    return is_ok
-
-
 def extract(cursor: sqlite3.Cursor,
             sqlite_table: str,
-            convertor, out_stream: io.TextIOBase) -> io.TextIOBase:
+            convertor: Callable[[dict], str],
+            out_stream: io.TextIOBase) -> io.TextIOBase:
     cursor.execute('SELECT * FROM {table};'.format(table=sqlite_table))
     for entry in cursor.fetchall():
         try:
