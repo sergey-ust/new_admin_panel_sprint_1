@@ -56,6 +56,7 @@ def load_from_sqlite(sqlite_curs: sqlite3.Cursor, pg_cursor):
             convert=create_person_film_work
         ),
     )
+    result = True
     for conv in convertors:
         buff = io.StringIO()
         buff = extract(sqlite_curs, conv.sqlite_table, conv.convert, buff)
@@ -63,13 +64,9 @@ def load_from_sqlite(sqlite_curs: sqlite3.Cursor, pg_cursor):
             post(pg_cursor, buff, conv.psql_table)
         except Exception as exp:
             print(f"Insertion into {conv.psql_table} error: {exp}.")
-            if not clear_psql(pg_cursor, ('content.film_work',
-                                          'content.person',
-                                          'content.genre',
-                                          )):
-                print("There were some problems by PostgreSQL tables " +
-                      "truncating, please check the result in your DB viewer")
-                break
+            result = False
+            break
+    return result
 
 
 def clear_psql(cursor, psql_tables: tuple[str]) -> bool:
@@ -161,7 +158,11 @@ def main():
     with sqlite_conn_context(db_path) as sqlite, \
             psycopg2.connect(**dsl, cursor_factory=DictCursor) as pg_conn, \
             pg_conn.cursor() as pg_cursor:
-        load_from_sqlite(sqlite.cursor(), pg_cursor)
+        pg_cursor.execute('SET SESSION TIME ZONE "UTC";')
+        if not load_from_sqlite(sqlite.cursor(), pg_cursor):
+            pg_conn.rollback()
+            print("There were some problems by tables " +
+                  "truncating, please check the result in your DB viewer")
 
 
 if __name__ == '__main__':
