@@ -89,6 +89,21 @@ def extract(cursor: sqlite3.Cursor,
     return out_stream
 
 
+def extract_part(cursor: sqlite3.Cursor,
+                 table_name: str,
+                 limit: int,
+                 offset: int = 0) -> list:
+    cursor.execute(
+        'SELECT * FROM {table} LIMIT {limit} OFFSET {offset};'.format(
+            table=table_name,
+            limit=limit,
+            offset=offset
+        )
+    )
+
+    return cursor.fetchall()
+
+
 def post(pg_cursor, csv: io.TextIOBase, postgres_name: str):
     pg_cursor.execute(
         "TRUNCATE TABLE {table} CASCADE;".format(table=postgres_name))
