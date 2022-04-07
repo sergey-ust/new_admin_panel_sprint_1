@@ -1,9 +1,8 @@
 Django==4.0.3
 django-split-settings==1.1.0
+django_debug_toolbar==3.2.4
 flake8==4.0.1
 pre_commit==2.17
-psycopg2==2.9.3
 pytest==7.1.1
 python-dotenv==0.20.0
 wemake_python_styleguide==0.16.1
-django_debug_toolbar==3.2.4
