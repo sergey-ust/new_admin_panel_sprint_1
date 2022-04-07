@@ -1,8 +1,8 @@
-import io
 from contextlib import contextmanager
+from dataclasses import dataclass
+import io
 import os
 import sqlite3
-from dataclasses import dataclass
 from typing import Callable, Union
 
 from dotenv import load_dotenv
@@ -121,6 +121,7 @@ def post(pg_cursor, csv: io.TextIOBase, postgres_name: str):
 @contextmanager
 def sqlite_conn_context(db_path: str):
     """ Attention!
+
         We couldn't use 'sqlite3.PARSE_COLNAMES | sqlite3.PARSE_DECLTYPES'
         for connection, Our db contains wrong formatted datetime fields:
         e.g: 'filmwork' 6th row field 'updated_at'

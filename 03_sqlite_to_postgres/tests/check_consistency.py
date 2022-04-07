@@ -1,12 +1,12 @@
+from dataclasses import dataclass
 import os
 import sqlite3
-from dataclasses import dataclass
 from typing import Callable
 
 from dotenv import load_dotenv
-import pytest
 import psycopg2
 from psycopg2.extras import DictCursor
+import pytest
 
 import load_data
 import tables
@@ -57,9 +57,9 @@ def test_sizes(psql_connect, sqlite_connect):
     pg_curs = psql_connect
 
     tables_ = (
-        ("content.film_work", "film_work"),
-        ("content.person", "person"),
-        ("content.genre", "genre"),
+        ('content.film_work', 'film_work'),
+        ('content.person', 'person'),
+        ('content.genre', 'genre'),
         ('content.genre_film_work', 'genre_film_work'),
         ('content.person_film_work', 'person_film_work'),
     )
@@ -166,8 +166,9 @@ def test_equality(psql_connect, sqlite_connect):
                                                offset)
             cnt = len(lite_data)
             for i in range(cnt):
-                assert conv.postgresql.create_class(dict(post_data[i])) \
-                       == conv.sqlite.create_class(dict(lite_data[i]))
+                assert conv.postgresql.create_class(
+                    dict(post_data[i])
+                ) == conv.sqlite.create_class(dict(lite_data[i]))
 
             offset += cnt
             if cnt < size:

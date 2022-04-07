@@ -1,7 +1,11 @@
+""" Databases tables.
+This packet contains source and target DB tables in dataclasses.
+"""
+
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
-import uuid
 from typing import Union
+import uuid
 
 MAX_UNIX_DATE = '2038-01-19'
 UNIX_DATE_EMPTY_MARK = MAX_UNIX_DATE
@@ -12,19 +16,19 @@ DELIMITER = ','
 Str_None = Union[str, None]
 
 
-def quotes(line: str) -> str:
+def _quotes(line: str) -> str:
     return QUOTE_SYMBOL + line + QUOTE_SYMBOL
 
 
-def str_to_datetime(line: str) -> datetime:
+def _str_to_datetime(line: str) -> datetime:
     if line:
-        return datetime.strptime(line + ':00',
-                                 '%Y-%m-%d %H:%M:%S.%f%z')
+        return datetime.strptime(line + ':00', '%Y-%m-%d %H:%M:%S.%f%z')
     return datetime.datetime.utcnow()
 
 
 class SqliteTables:
     """ Attention.
+
         Tables should have 'date' and 'datetime' types, but our db contains
          wrong formatted datetime fields.
          e.g.: 'filmwork' 6th row field 'updated_at'
@@ -96,14 +100,15 @@ class FilmWork:
             lite_table.creation_date if lite_table.creation_date
             else UNIX_DATE_EMPTY_MARK
         )
+        _rating = None
         try:
             _rating = float(lite_table.rating)
         except Exception:
-            _rating = None
+            pass
 
-        created_at = str_to_datetime(lite_table.created_at).replace(
+        created_at = _str_to_datetime(lite_table.created_at).replace(
             tzinfo=timezone.utc)
-        updated_at = str_to_datetime(lite_table.updated_at).replace(
+        updated_at = _str_to_datetime(lite_table.updated_at).replace(
             tzinfo=timezone.utc)
 
         return FilmWork(
@@ -123,12 +128,12 @@ class FilmWork:
             created=self.created.isoformat(),
             modified=self.modified.isoformat(),
             id_=self.id,
-            title=quotes(self.title)
+            title=_quotes(self.title)
         ) + '{description},{creation_date},{rating},{type_}\n'.format(
-            description=quotes(self.description),
+            description=_quotes(self.description),
             creation_date=self.creation_date.isoformat(),
             rating=self.rating if self.rating else NULL_SYMBOL,
-            type_=quotes(self.type),
+            type_=_quotes(self.type),
         )
 
 
@@ -147,9 +152,9 @@ class Genre:
 
     @staticmethod
     def create_from_sqlite(lite_table: SqliteTables.Genre):
-        created_at = str_to_datetime(lite_table.created_at).replace(
+        created_at = _str_to_datetime(lite_table.created_at).replace(
             tzinfo=timezone.utc)
-        updated_at = str_to_datetime(lite_table.updated_at).replace(
+        updated_at = _str_to_datetime(lite_table.updated_at).replace(
             tzinfo=timezone.utc)
 
         return Genre(
@@ -166,8 +171,8 @@ class Genre:
             created=self.created.isoformat(),
             modified=self.modified.isoformat(),
             id_=self.id,
-            name=quotes(self.name),
-            description=quotes(self.description) if self.description
+            name=_quotes(self.name),
+            description=_quotes(self.description) if self.description
             else NULL_SYMBOL,
         )
 
@@ -186,9 +191,9 @@ class Person:
 
     @staticmethod
     def create_from_sqlite(lite_table: SqliteTables.Person):
-        created_at = str_to_datetime(lite_table.created_at).replace(
+        created_at = _str_to_datetime(lite_table.created_at).replace(
             tzinfo=timezone.utc)
-        updated_at = str_to_datetime(lite_table.updated_at).replace(
+        updated_at = _str_to_datetime(lite_table.updated_at).replace(
             tzinfo=timezone.utc)
 
         return Person(
@@ -204,7 +209,7 @@ class Person:
             created=self.created.isoformat(),
             modified=self.modified.isoformat(),
             id_=self.id,
-            name=quotes(self.full_name),
+            name=_quotes(self.full_name),
         )
 
 
@@ -220,7 +225,7 @@ class PersonFilmWork:
 
     @staticmethod
     def create_from_sqlite(lite_table: SqliteTables.PersonFilmWork):
-        created_at = str_to_datetime(lite_table.created_at).replace(
+        created_at = _str_to_datetime(lite_table.created_at).replace(
             tzinfo=timezone.utc)
 
         return PersonFilmWork(
@@ -238,7 +243,7 @@ class PersonFilmWork:
             id_=self.id,
             film_id=self.film_work_id,
             person_id=self.person_id,
-            role=quotes(self.role),
+            role=_quotes(self.role),
         )
 
 
@@ -253,7 +258,7 @@ class GenreFilmWork:
 
     @staticmethod
     def create_from_sqlite(lite_table: SqliteTables.GenreFilmWork):
-        created_at = str_to_datetime(lite_table.created_at).replace(
+        created_at = _str_to_datetime(lite_table.created_at).replace(
             tzinfo=timezone.utc)
 
         return GenreFilmWork(
