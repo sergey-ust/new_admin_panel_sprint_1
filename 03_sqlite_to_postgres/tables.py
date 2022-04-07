@@ -16,7 +16,58 @@ def quotes(line: str) -> str:
     return QUOTE_SYMBOL + line + QUOTE_SYMBOL
 
 
-@dataclass()
+
+class SqliteTables:
+    """ Attention.
+        Tables should have 'date' and 'datetime' types, but our db contains
+         wrong formatted datetime fields.
+         e.g.: 'filmwork' 6th row field 'updated_at'
+    """
+
+    @dataclass(frozen=True)
+    class FilmWork:
+        id: str
+        title: str
+        description: Str_None
+        creation_date: Str_None
+        file_path: Str_None
+        rating: Str_None
+        type: str
+        created_at: Str_None
+        updated_at: Str_None
+
+    @dataclass(frozen=True)
+    class Genre:
+        id: str
+        name: str
+        description: Str_None
+        created_at: Str_None
+        updated_at: Str_None
+
+    @dataclass(frozen=True)
+    class Person:
+        id: str
+        full_name: str
+        created_at: Str_None
+        updated_at: Str_None
+
+    @dataclass(frozen=True)
+    class GenreFilmWork:
+        id: str
+        created_at: Str_None
+        film_work_id: str
+        genre_id: str
+
+    @dataclass(frozen=True)
+    class PersonFilmWork:
+        id: str
+        role: str
+        created_at: Str_None
+        film_work_id: str
+        person_id: str
+
+
+@dataclass(frozen=True)
 class FilmWork:
     """PostreSQL 'filmwork' Table."""
 
@@ -82,7 +133,7 @@ class FilmWork:
         )
 
 
-@dataclass()
+@dataclass(frozen=True)
 class Genre:
     """PostreSQL 'genre' Table."""
 
@@ -128,7 +179,8 @@ class Genre:
         )
 
 
-@dataclass()
+
+@dataclass(frozen=True)
 class Person:
     """PostreSQL 'person' Table."""
 
@@ -171,7 +223,7 @@ class Person:
         )
 
 
-@dataclass()
+@dataclass(frozen=True)
 class PersonFilmWork:
     """PostreSQL 'person_filmwork' Table."""
 
@@ -209,7 +261,7 @@ class PersonFilmWork:
         )
 
 
-@dataclass()
+@dataclass(frozen=True)
 class GenreFilmWork:
     """PostreSQL 'genre_filmwork' Table."""
 
