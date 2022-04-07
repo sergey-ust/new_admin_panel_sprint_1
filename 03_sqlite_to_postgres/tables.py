@@ -119,12 +119,12 @@ class FilmWork:
 
     # FixMe: Replace all QUOTE_SYMBOL symbols
     def __str__(self) -> str:
-        return '{created},{modified},{id_},{title},\
-        {description},{creation_date},{rating},{type_}\n'.format(
+        return '{created},{modified},{id_},{title},'.format(
             created=self.created.isoformat(),
             modified=self.modified.isoformat(),
             id_=self.id,
-            title=quotes(self.title),
+            title=quotes(self.title)
+        ) + '{description},{creation_date},{rating},{type_}\n'.format(
             description=quotes(self.description),
             creation_date=self.creation_date.isoformat(),
             rating=self.rating if self.rating else NULL_SYMBOL,
