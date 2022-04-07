@@ -51,12 +51,12 @@ def test_sizes(psql_connect, sqlite_connect):
     sqlite_curs = sqlite_connect
     pg_curs = psql_connect
 
-    tables = (
+    tables_ = (
         ("content.film_work", "film_work"),
         ("content.person", "person"),
         ("content.genre", "genre"),
         ('content.genre_film_work', 'genre_film_work'),
         ('content.person_film_work', 'person_film_work'),
     )
-    for tbl in tables:
+    for tbl in tables_:
         assert get_size(pg_curs, tbl[0]) == get_size(sqlite_curs, tbl[1])

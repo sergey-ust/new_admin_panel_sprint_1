@@ -111,7 +111,7 @@ class FilmWork:
             title=lite_table.title[: FilmWork._TITLE_MAX_LEN],
             description=descr,
             creation_date=creation,
-            rating=lite_table.rating,
+            rating=_rating,
             type=lite_table.type[:FilmWork._TYPE_MAX_LEN],
             created=created_at,
             modified=updated_at
@@ -170,7 +170,6 @@ class Genre:
             description=quotes(self.description) if self.description
             else NULL_SYMBOL,
         )
-
 
 
 @dataclass(frozen=True)
