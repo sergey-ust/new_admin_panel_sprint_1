@@ -29,41 +29,50 @@ class FilmWork:
     creation_date: date
     rating: Union[float, None]
     type: str
-    created_at: datetime
-    updated_at: datetime
+    created: datetime
+    modified: datetime
 
-    def __init__(
-            self, id_: str, title: str, description: Str_None,
+    @staticmethod
+    def create_from_sqlite(
+            id_: str, title: str, description: Str_None,
             creation_date: Str_None, rating: str, type_: str,
             created_at: Str_None, updated_at: Str_None
     ):
-        self.id = uuid.UUID(id_)
-        self.title = title[: self._TITLE_MAX_LEN]
-        self.description = description if description else ''
-        self.creation_date = date.fromisoformat(
+        descr = description if description else ''
+        creation = date.fromisoformat(
             creation_date if creation_date else UNIX_DATE_EMPTY_MARK)
         try:
-            self.rating = float(rating)
+            _rating = float(rating)
         except Exception:
-            self.rating = None
-        self.type = type_[:self._TYPE_MAX_LEN]
+            _rating = None
         if created_at:
-            self.created_at = datetime.strptime(created_at + ':00',
-                                                '%Y-%m-%d %H:%M:%S.%f%z')
+            created = datetime.strptime(created_at + ':00',
+                                        '%Y-%m-%d %H:%M:%S.%f%z')
         else:
-            self.created_at = datetime.datetime.utcnow()
+            created = datetime.datetime.utcnow()
         if updated_at:
-            self.updated_at = datetime.strptime(updated_at + ':00',
-                                                '%Y-%m-%d %H:%M:%S.%f%z')
+            updated = datetime.strptime(updated_at + ':00',
+                                        '%Y-%m-%d %H:%M:%S.%f%z')
         else:
-            self.updated_at = datetime.datetime.utcnow()
+            updated = datetime.datetime.utcnow()
+
+        return FilmWork(
+            id=uuid.UUID(id_),
+            title=title[: FilmWork._TITLE_MAX_LEN],
+            description=descr,
+            creation_date=creation,
+            rating=_rating,
+            type=type_[:FilmWork._TYPE_MAX_LEN],
+            created=created,
+            modified=updated
+        )
 
     # FixMe: Replace all QUOTE_SYMBOL symbols
     def __str__(self) -> str:
         return '{created},{modified},{id_},{title},\
         {description},{creation_date},{rating},{type_}\n'.format(
-            created=self.created_at.isoformat(),
-            modified=self.updated_at.isoformat(),
+            created=self.created.isoformat(),
+            modified=self.modified.isoformat(),
             id_=self.id,
             title=quotes(self.title),
             description=quotes(self.description),
@@ -83,33 +92,35 @@ class Genre:
     id: uuid.UUID
     name: str
     description: Str_None
-    created_at: datetime
-    updated_at: datetime
+    created: datetime
+    modified: datetime
 
-    def __init__(
-            self, id_: str, name: str, description: Str_None,
-            created_at: Str_None, updated_at: Str_None
-    ):
-        self.id = uuid.UUID(id_)
-        self.name = name[: self._NAME_MAX_LEN]
-        self.description = description
+    @staticmethod
+    def create_from_sqlite(
+            id_: str, name: str, description: Str_None,
+            created_at: Str_None, updated_at: Str_None):
 
         if created_at:
-            self.created_at = datetime.strptime(created_at + ':00',
-                                                '%Y-%m-%d %H:%M:%S.%f%z')
+            created_at = datetime.strptime(created_at + ':00',
+                                           '%Y-%m-%d %H:%M:%S.%f%z')
         else:
-            self.created_at = datetime.datetime.utcnow()
+            created_at = datetime.datetime.utcnow()
         if updated_at:
-            self.updated_at = datetime.strptime(updated_at + ':00',
-                                                '%Y-%m-%d %H:%M:%S.%f%z')
+            updated_at = datetime.strptime(
+                updated_at + ':00',
+                '%Y-%m-%d %H:%M:%S.%f%z')
         else:
-            self.updated_at = datetime.datetime.utcnow()
+            updated_at = datetime.datetime.utcnow()
+        return Genre(
+            uuid.UUID(id_), name[: Genre._NAME_MAX_LEN],
+            description, created_at, updated_at
+        )
 
     # FixMe: Replace all QUOTE_SYMBOL symbols
     def __str__(self) -> str:
         return '{created},{modified},{id_},{name},{description}\n'.format(
-            created=self.created_at.isoformat(),
-            modified=self.updated_at.isoformat(),
+            created=self.created.isoformat(),
+            modified=self.modified.isoformat(),
             id_=self.id,
             name=quotes(self.name),
             description=quotes(self.description) if self.description
@@ -126,30 +137,35 @@ class Person:
 
     id: uuid.UUID
     full_name: str
-    created_at: datetime
-    updated_at: datetime
+    created: datetime
+    modified: datetime
 
-    def __init__(self, id_: str, full_name: str, created_at: Str_None,
-                 updated_at: Str_None):
-        self.id = uuid.UUID(id_)
-        self.full_name = full_name[: self._NAME_MAX_LEN]
-
+    @staticmethod
+    def create_from_sqlite(id_: str, full_name: str, created_at: Str_None,
+                           updated_at: Str_None):
         if created_at:
-            self.created_at = datetime.strptime(created_at + ':00',
-                                                '%Y-%m-%d %H:%M:%S.%f%z')
+            created = datetime.strptime(created_at + ':00',
+                                        '%Y-%m-%d %H:%M:%S.%f%z')
         else:
-            self.created_at = datetime.datetime.utcnow()
+            created = datetime.datetime.utcnow()
         if updated_at:
-            self.updated_at = datetime.strptime(updated_at + ':00',
-                                                '%Y-%m-%d %H:%M:%S.%f%z')
+            updated = datetime.strptime(updated_at + ':00',
+                                        '%Y-%m-%d %H:%M:%S.%f%z')
         else:
-            self.updated_at = datetime.datetime.utcnow()
+            updated = datetime.datetime.utcnow()
+
+        return Person(
+            id=uuid.UUID(id_),
+            full_name=full_name[: Person._NAME_MAX_LEN],
+            created=created,
+            modified=updated
+        )
 
     # FixMe: Replace all QUOTE_SYMBOL symbols
     def __str__(self) -> str:
         return '{created},{modified},{id_},{name}\n'.format(
-            created=self.created_at.isoformat(),
-            modified=self.updated_at.isoformat(),
+            created=self.created.isoformat(),
+            modified=self.modified.isoformat(),
             id_=self.id,
             name=quotes(self.full_name),
         )
@@ -165,18 +181,22 @@ class PersonFilmWork:
     film_work_id: uuid.UUID
     person_id: uuid.UUID
 
-    def __init__(self, id_: str, role: str, created_at: Str_None,
-                 film_work_id: str, person_id: str):
-        self.id = uuid.UUID(id_)
-        self.film_work_id = uuid.UUID(film_work_id)
-        self.person_id = uuid.UUID(person_id)
-        self.role = role
-
+    @staticmethod
+    def create_from_sqlite(id_: str, role: str, created_at: Str_None,
+                           film_work_id: str, person_id: str):
         if created_at:
-            self.created = datetime.strptime(created_at + ':00',
-                                             '%Y-%m-%d %H:%M:%S.%f%z')
+            created = datetime.strptime(created_at + ':00',
+                                        '%Y-%m-%d %H:%M:%S.%f%z')
         else:
-            self.created = datetime.datetime.utcnow()
+            created = datetime.datetime.utcnow()
+
+        return PersonFilmWork(
+            id=uuid.UUID(id_),
+            role=role,
+            created=created,
+            film_work_id=uuid.UUID(film_work_id),
+            person_id=uuid.UUID(person_id)
+        )
 
     # FixMe: Replace all QUOTE_SYMBOL symbols
     def __str__(self) -> str:
@@ -198,17 +218,21 @@ class GenreFilmWork:
     film_work_id: uuid.UUID
     genre_id: uuid.UUID
 
-    def __init__(self, id_: str, created_at: Str_None, film_work_id: str,
-                 genre_id: str):
-        self.id = uuid.UUID(id_)
-        self.film_work_id = uuid.UUID(film_work_id)
-        self.genre_id = uuid.UUID(genre_id)
-
+    @staticmethod
+    def create_from_sqlite(id_: str, created_at: Str_None, film_work_id: str,
+                           genre_id: str):
         if created_at:
-            self.created = datetime.strptime(created_at + ':00',
-                                             '%Y-%m-%d %H:%M:%S.%f%z')
+            created = datetime.strptime(created_at + ':00',
+                                        '%Y-%m-%d %H:%M:%S.%f%z')
         else:
-            self.created = datetime.datetime.utcnow()
+            created = datetime.datetime.utcnow()
+
+        return GenreFilmWork(
+            id=uuid.UUID(id_),
+            created=created,
+            film_work_id=uuid.UUID(film_work_id),
+            genre_id=uuid.UUID(genre_id)
+        )
 
     # FixMe: Replace all QUOTE_SYMBOL symbols
     def __str__(self) -> str:

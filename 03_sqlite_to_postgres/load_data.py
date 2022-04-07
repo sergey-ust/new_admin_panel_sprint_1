@@ -113,27 +113,27 @@ def create_film_work(data: dict) -> str:
     data["id_"] = data.pop("id")
     data["type_"] = data.pop("type")
     data.pop("file_path")
-    return str(tables.FilmWork(**data))
+    return str(tables.FilmWork.create_from_sqlite(**data))
 
 
 def create_genre(data: dict) -> str:
     data["id_"] = data.pop("id")
-    return str(tables.Genre(**data))
+    return str(tables.Genre.create_from_sqlite(**data))
 
 
 def create_person(data: dict) -> str:
     data["id_"] = data.pop("id")
-    return str(tables.Person(**data))
+    return str(tables.Person.create_from_sqlite(**data))
 
 
 def create_person_film_work(data: dict) -> str:
     data["id_"] = data.pop("id")
-    return str(tables.PersonFilmWork(**data))
+    return str(tables.PersonFilmWork.create_from_sqlite(**data))
 
 
 def create_genre_film_work(data: dict) -> str:
     data["id_"] = data.pop("id")
-    return str(tables.GenreFilmWork(**data))
+    return str(tables.GenreFilmWork.create_from_sqlite(**data))
 
 
 @contextmanager
