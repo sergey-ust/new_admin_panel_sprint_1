@@ -141,9 +141,9 @@ def sqlite_conn_context(db_path: str):
 def main():
     load_dotenv()
     dsl = {
-        'dbname': os.environ.get('DB_NAME', 'movies_database'),
-        'user': 'app',
-        'password': '123qwe',
+        'dbname': os.environ.get('DB_NAME'),
+        'user': os.environ.get('DB_USER'),
+        'password': os.environ.get('DB_PASSWORD'),
         'host': os.environ.get('DB_HOST', '127.0.0.1'),
         'port': int(os.environ.get('DB_PORT', 5432)),
     }
