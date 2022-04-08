@@ -94,9 +94,11 @@ class GenreFilmWork(UUIDMixin):
 
     film_work = models.ForeignKey(
         'FilmWork', on_delete=models.CASCADE, verbose_name=_('film work'),
+        db_index=False
     )
     genre = models.ForeignKey(
         'Genre', on_delete=models.CASCADE, verbose_name=_('genre'),
+        db_index=False
     )
     created = models.DateTimeField(_('created'), auto_now_add=True)
 
@@ -107,6 +109,16 @@ class GenreFilmWork(UUIDMixin):
         constraints = [
             models.UniqueConstraint(fields=('film_work', 'genre'),
                                     name='unique_film_genre')
+        ]
+        indexes = [
+            models.Index(
+                fields=['film_work'],
+                name='genre_film_work_film_work_id'
+            ),
+            models.Index(
+                fields=['genre'],
+                name='genre_film_work_genre_id'
+            ),
         ]
 
     def __str__(self) -> str:
@@ -124,9 +136,11 @@ class PersonFilmWork(UUIDMixin):
 
     film_work = models.ForeignKey(
         'FilmWork', on_delete=models.CASCADE, verbose_name=_('film work'),
+        db_index=False
     )
     person = models.ForeignKey(
         'Person', on_delete=models.CASCADE, verbose_name=_('person'),
+        db_index=False
     )
     role = models.CharField(
         _('role'),
@@ -140,6 +154,16 @@ class PersonFilmWork(UUIDMixin):
         db_table = 'content"."person_film_work'
         verbose_name = _('film person')
         verbose_name_plural = _('film persons')
+        indexes = [
+            models.Index(
+                fields=['film_work'],
+                name='person_film_work_film_work_id'
+            ),
+            models.Index(
+                fields=['person'],
+                name='person_film_work_person_id'
+            ),
+        ]
 
     def __str__(self) -> str:
         return ''
