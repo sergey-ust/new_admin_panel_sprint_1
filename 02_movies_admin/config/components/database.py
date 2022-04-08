@@ -5,6 +5,10 @@ import os
 _DB_DEFAULT_IP = '127.0.0.1'
 _DB_DEFAULT_PORT = 5432
 
+# Database
+# https://docs.djangoproject.com/en/4.0/ref/settings/#databases
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
