@@ -102,9 +102,12 @@ class GenreFilmWork(UUIDMixin):
 
     class Meta:
         db_table = 'content"."genre_film_work'
-        unique_together = ('film_work', 'genre')
         verbose_name = _('film genre')
         verbose_name_plural = _('film genres')
+        constraints = [
+            models.UniqueConstraint(fields=('film_work', 'genre'),
+                                    name='unique_film_genre')
+        ]
 
     def __str__(self) -> str:
         """No printable information."""
