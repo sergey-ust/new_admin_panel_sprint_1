@@ -54,11 +54,11 @@ msgstr "имя"
 
 #: movies/models.py:52 movies/models.py:129
 msgid "person"
-msgstr "актер"
+msgstr "участник съемок"
 
 #: movies/models.py:53
 msgid "persons"
-msgstr "актеры"
+msgstr "участники съемок"
 
 #: movies/models.py:61
 msgid "movie"
@@ -118,8 +118,8 @@ msgstr "роль"
 
 #: movies/models.py:141
 msgid "film person"
-msgstr "актер кинопроизведения"
+msgstr "задействованное лицо"
 
 #: movies/models.py:142
 msgid "film persons"
-msgstr "актеры кинопроизведения"
+msgstr "задействованные лица"
