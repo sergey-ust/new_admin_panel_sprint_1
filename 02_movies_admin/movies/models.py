@@ -58,8 +58,9 @@ class Person(UUIDMixin, TimeStampedMixin):
 
 class FilmWork(UUIDMixin, TimeStampedMixin):
     class _FilmType(models.TextChoices):
-        MOVIE = 'MOVIE', _('movie')
-        TV_SHOW = 'TV_SHOW', _('tv_show')
+        MOVIE = 'movie', _('movie')
+        TV_SHOW = 'tv_show', _('tv_show')
+        __empty__ = _('(unknown)')
 
     title = models.CharField(_('film_name'), max_length=_FILM_NAME_MAX_LEN)
     description = models.TextField(_('description'))
@@ -129,10 +130,11 @@ class GenreFilmWork(UUIDMixin):
 class PersonFilmWork(UUIDMixin):
     """Many To Many for "FilmWork" and "Person"."""
 
-    class _Role(models.TextChoices):
-        ACTOR = 'ACTOR', _('actor')
-        DIRECTOR = 'DIRECTOR', _('director')
-        WRITER = 'WRITER', _('writer')
+    class Role(models.TextChoices):
+        ACTOR = 'actor', _('actor')
+        DIRECTOR = 'director', _('director')
+        WRITER = 'writer', _('writer')
+        __empty__ = _('(unknown)')
 
     film_work = models.ForeignKey(
         'FilmWork', on_delete=models.CASCADE, verbose_name=_('film work'),
@@ -145,7 +147,7 @@ class PersonFilmWork(UUIDMixin):
     role = models.CharField(
         _('role'),
         max_length=_ROLE_MAX_LEN,
-        choices=_Role.choices,
+        choices=Role.choices,
         null=True
     )
     created = models.DateTimeField(auto_now_add=True)
