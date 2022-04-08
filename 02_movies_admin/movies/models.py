@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 _PERSON_NAME_MAX_LEN = 200
 _FILM_NAME_MAX_LEN = 200
 _FILM_TYPE_NAME_MAX_LEN = 15
+_ROLE_MAX_LEN = 15
 
 
 class TimeStampedMixin(models.Model):
@@ -113,13 +114,23 @@ class GenreFilmWork(UUIDMixin):
 class PersonFilmWork(UUIDMixin):
     """Many To Many for "FilmWork" and "Person"."""
 
+    class _Role(models.TextChoices):
+        ACTOR = 'ACTOR', _('actor')
+        DIRECTOR = 'DIRECTOR', _('director')
+        WRITER = 'WRITER', _('writer')
+
     film_work = models.ForeignKey(
         'FilmWork', on_delete=models.CASCADE, verbose_name=_('film work'),
     )
     person = models.ForeignKey(
         'Person', on_delete=models.CASCADE, verbose_name=_('person'),
     )
-    role = models.TextField(_('role'), null=True, blank=True)
+    role = models.CharField(
+        _('role'),
+        max_length=_ROLE_MAX_LEN,
+        choices=_Role.choices,
+        null=True
+    )
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
