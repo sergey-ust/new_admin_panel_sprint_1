@@ -1,9 +1,8 @@
+"""Project base settings."""
+
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Application definition
 
 INSTALLED_APPS = (
     'django.contrib.admin',
@@ -47,7 +46,5 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.0/howto/static-files/
-
+# Static files (CSS, JavaScript, Images) folder
 STATIC_URL = 'static/'
