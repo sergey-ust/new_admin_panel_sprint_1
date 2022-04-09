@@ -1,6 +1,6 @@
 """Project localization settings."""
 
-LANGUAGE_CODE = 'en-RU'
+LANGUAGE_CODE = 'ru-RU'
 LANGUAGES = (
     ('en', 'English'),
     ('ru', 'Russian'),
