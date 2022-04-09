@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 from dataclasses import dataclass
 import io
+import logging
 import os
 import sqlite3
 from typing import Callable, Union
@@ -19,6 +20,9 @@ AnyTable = Union[
     tables.PersonFilmWork,
     tables.GenreFilmWork
 ]
+
+logging.basicConfig(format="%(asctime)s[%(name)s]: %(message)s", level="INFO")
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -68,9 +72,11 @@ def load_from_sqlite(sqlite_curs: sqlite3.Cursor, pg_cursor):
         try:
             post(pg_cursor, buff, conv.psql_table)
         except Exception as exp:
-            print(f"Insertion into {conv.psql_table} error: {exp}.")
+            logger.error(f'Insertion into {conv.psql_table} error: {exp}.')
             result = False
             break
+        else:
+            logger.debug(f'{conv.sqlite_table} copied into {conv.psql_table}')
     return result
 
 
@@ -83,7 +89,7 @@ def extract(cursor: sqlite3.Cursor,
         try:
             fw_line = str(convertor(dict(entry)))
         except Exception as e:
-            print(f'Can\'t convert entry({entry}): {e}')
+            logger.error(f'Can\'t convert entry({entry}): {e}')
         else:
             out_stream.write(fw_line)
     return out_stream
@@ -106,7 +112,7 @@ def extract_part(cursor: sqlite3.Cursor,
 
 def post(pg_cursor, csv: io.TextIOBase, postgres_name: str):
     pg_cursor.execute(
-        "TRUNCATE TABLE {table} CASCADE;".format(table=postgres_name))
+        'TRUNCATE TABLE {table} CASCADE;'.format(table=postgres_name))
     csv.seek(0)
     pg_cursor.copy_expert(
         "COPY {table} FROM STDIN \
@@ -135,9 +141,9 @@ def sqlite_conn_context(db_path: str):
 def main():
     load_dotenv()
     dsl = {
-        'dbname': os.environ.get('DB_NAME', 'movies_database'),
-        'user': 'app',
-        'password': '123qwe',
+        'dbname': os.environ.get('DB_NAME'),
+        'user': os.environ.get('DB_USER'),
+        'password': os.environ.get('DB_PASSWORD'),
         'host': os.environ.get('DB_HOST', '127.0.0.1'),
         'port': int(os.environ.get('DB_PORT', 5432)),
     }
@@ -150,8 +156,10 @@ def main():
         pg_cursor.execute('SET SESSION TIME ZONE "UTC";')
         if not load_from_sqlite(sqlite.cursor(), pg_cursor):
             pg_conn.rollback()
-            print("There were some problems by tables. " +
-                  "Please check the work result in your DB viewer")
+            logger.error('There were some problems by tables. ' +
+                         'Please check the work result in your DB viewer')
+        else:
+            logger.info(f'Database coping finished successful')
 
 
 if __name__ == '__main__':

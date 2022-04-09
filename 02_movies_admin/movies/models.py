@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 _PERSON_NAME_MAX_LEN = 200
 _FILM_NAME_MAX_LEN = 200
 _FILM_TYPE_NAME_MAX_LEN = 15
+_ROLE_MAX_LEN = 15
 
 
 class TimeStampedMixin(models.Model):
@@ -18,8 +19,6 @@ class TimeStampedMixin(models.Model):
     modified = models.DateTimeField(_('modified'), auto_now=True)
 
     class Meta:
-        """ORM meta data."""
-
         abstract = True
 
 
@@ -29,53 +28,39 @@ class UUIDMixin(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     class Meta:
-        """ORM meta data."""
-
         abstract = True
 
 
 class Genre(UUIDMixin, TimeStampedMixin):
-    """ORM model for "genre" table."""
-
     name = models.CharField(_(_('genre_name')), max_length=100, unique=True)
     description = models.TextField(_('description'), null=True, blank=True)
 
     class Meta:
-        """ORM meta data."""
-
         db_table = 'content"."genre'
         verbose_name = _('genre')
         verbose_name_plural = _('genres')
 
     def __str__(self) -> str:
-        """Genre name."""
         return self.name
 
 
 class Person(UUIDMixin, TimeStampedMixin):
-    """ORM model for "person' table."""
-
     full_name = models.CharField(_('name'), max_length=_PERSON_NAME_MAX_LEN)
 
     class Meta:
-        """ORM meta data."""
-
         db_table = 'content\".\"person'
         verbose_name = _('person')
         verbose_name_plural = _('persons')
 
     def __str__(self) -> str:
-        """Person full name."""
         return self.full_name
 
 
-class _FilmType(models.TextChoices):
-    MOVIE = 'MOVIE', _('movie')
-    TV_SHOW = 'TV_SHOW', _('tv_show')
-
-
 class FilmWork(UUIDMixin, TimeStampedMixin):
-    """ORM model for "film_work" table."""
+    class _FilmType(models.TextChoices):
+        MOVIE = 'movie', _('movie')
+        TV_SHOW = 'tv_show', _('tv_show')
+        __empty__ = _('(unknown)')
 
     title = models.CharField(_('film_name'), max_length=_FILM_NAME_MAX_LEN)
     description = models.TextField(_('description'))
@@ -95,37 +80,47 @@ class FilmWork(UUIDMixin, TimeStampedMixin):
     genres = models.ManyToManyField(Genre, through='GenreFilmWork')
     person = models.ManyToManyField(Person, through='PersonFilmWork')
 
-    # If DB Constraints are needed, they could be added in Meta
+    # If DB should check a field value, add "models.CheckConstraint" in "Meta"
     class Meta:
-        """ORM meta data."""
-
         db_table = 'content"."film_work'
         verbose_name = _('film work')
         verbose_name_plural = _('film works')
 
     def __str__(self) -> str:
-        """Convert to name + creation date."""
         return self.title + ' ({0})'.format(self.creation_date.year)
 
 
 class GenreFilmWork(UUIDMixin):
-    """Stuff object to connect "FilmWork" with "Genre"."""
+    """Many To Many for "FilmWork" and "Genre"."""
 
     film_work = models.ForeignKey(
         'FilmWork', on_delete=models.CASCADE, verbose_name=_('film work'),
+        db_index=False
     )
     genre = models.ForeignKey(
         'Genre', on_delete=models.CASCADE, verbose_name=_('genre'),
+        db_index=False
     )
     created = models.DateTimeField(_('created'), auto_now_add=True)
 
     class Meta:
-        """ORM meta data."""
-
         db_table = 'content"."genre_film_work'
-        unique_together = ('film_work', 'genre')
         verbose_name = _('film genre')
         verbose_name_plural = _('film genres')
+        constraints = [
+            models.UniqueConstraint(fields=('film_work', 'genre'),
+                                    name='unique_film_genre')
+        ]
+        indexes = [
+            models.Index(
+                fields=['film_work'],
+                name='genre_film_work_film_work_id'
+            ),
+            models.Index(
+                fields=['genre'],
+                name='genre_film_work_genre_id'
+            ),
+        ]
 
     def __str__(self) -> str:
         """No printable information."""
@@ -133,24 +128,44 @@ class GenreFilmWork(UUIDMixin):
 
 
 class PersonFilmWork(UUIDMixin):
-    """Stuff object to connect "FilmWork" with "Person"."""
+    """Many To Many for "FilmWork" and "Person"."""
+
+    class Role(models.TextChoices):
+        ACTOR = 'actor', _('actor')
+        DIRECTOR = 'director', _('director')
+        WRITER = 'writer', _('writer')
+        __empty__ = _('(unknown)')
 
     film_work = models.ForeignKey(
         'FilmWork', on_delete=models.CASCADE, verbose_name=_('film work'),
+        db_index=False
     )
     person = models.ForeignKey(
         'Person', on_delete=models.CASCADE, verbose_name=_('person'),
+        db_index=False
     )
-    role = models.TextField(_('role'), null=True, blank=True)
+    role = models.CharField(
+        _('role'),
+        max_length=_ROLE_MAX_LEN,
+        choices=Role.choices,
+        null=True
+    )
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        """ORM meta data."""
-
         db_table = 'content"."person_film_work'
         verbose_name = _('film person')
         verbose_name_plural = _('film persons')
+        indexes = [
+            models.Index(
+                fields=['film_work'],
+                name='person_film_work_film_work_id'
+            ),
+            models.Index(
+                fields=['person'],
+                name='person_film_work_person_id'
+            ),
+        ]
 
     def __str__(self) -> str:
-        """No printable information."""
         return ''

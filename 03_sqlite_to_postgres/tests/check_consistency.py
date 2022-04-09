@@ -172,5 +172,4 @@ def test_equality(psql_connect, sqlite_connect):
 
             offset += cnt
             if cnt < size:
-                print(f'\nLines {offset}')
                 break
