@@ -31,6 +31,18 @@ class FilmWorkAdmin(admin.ModelAdmin):
     """Admin model for ORM model "FilmWork"."""
 
     inlines = (_GenreFilmWorkInline, _PersonFilmWorkInline)
-    list_display = ('title', 'type', 'creation_date', 'rating')
-    list_filter = ('type',)
+    list_display = (
+        'title',
+        'type',
+        'creation_date',
+        'rating',
+    )
     search_fields = ('title', 'description')
+    list_filter = ('type',)
+    # optimize many-to-many queries with 'prefetch_related'
+    list_prefetch_related = ('genres', 'person')
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related(
+            *self.list_prefetch_related
+        )
