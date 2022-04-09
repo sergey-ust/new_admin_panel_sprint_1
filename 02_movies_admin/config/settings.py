@@ -15,6 +15,8 @@ include(
     'components/local.py',
     'components/apps.py',
 )
+if DEBUG and os.environ.get('SQL_LOGGING', False) == 'True':
+    include('components/log.py')
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
