@@ -1,6 +1,7 @@
 """Admin panel models."""
 
 from django.contrib import admin
+from django.utils.translation import gettext_lazy as _
 
 from movies import models as mov_model
 
@@ -36,6 +37,7 @@ class FilmWorkAdmin(admin.ModelAdmin):
         'type',
         'creation_date',
         'rating',
+        'get_genres',
     )
     search_fields = ('title', 'description')
     list_filter = ('type',)
@@ -46,3 +48,7 @@ class FilmWorkAdmin(admin.ModelAdmin):
         return super().get_queryset(request).prefetch_related(
             *self.list_prefetch_related
         )
+
+    @admin.display(description=_('genre'))
+    def get_genres(self, obj):
+        return ','.join([genre.name for genre in obj.genres.all()])
